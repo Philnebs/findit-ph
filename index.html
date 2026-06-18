@@ -1,120 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FindIt PH - Port Harcourt Businesses</title>
-  <script src="https://js.paystack.co/v1/inline.js"></script>
-  <script src="config.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 15px; background: #f5f5f5; }
-    .header { background: #2563eb; color: white; padding: 20px; border-radius: 10px; text-align: center; }
-    .card { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .btn { background: #16a34a; color: white; padding: 12px 20px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; margin: 5px 0; }
-    .btn-unlock { background: #dc2626; }
-    .btn-call { background: #2563eb; }
-    .btn-wa { background: #16a34a; }
-    .hidden { display: none; }
-    input, textarea, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindIt PH - Search Services</title>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            padding: 20px;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #0A3D62; font-size: 2rem; }
+        .header p { color: #666; margin-top: 5px; }
+        
+        .search-box { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .search-input { 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 16px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .search-btn { 
+            width: 100%; 
+            padding: 15px; 
+            background: #0A3D62; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .search-btn:hover { background: #062940; }
+        
+        .register-btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #25D366; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .result-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: none;
+        }
+        .result-card.show { display: block; }
+        .biz-name { font-size: 1.3rem; font-weight: bold; color: #0A3D62; }
+        .biz-cat { color: #E55039; font-weight: bold; font-size: 0.9rem; margin: 5px 0; }
+        .biz-area { color: #666; font-size: 0.9rem; }
+        .phone { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            margin: 15px 0; 
+            color: #333;
+        }
+        .unlock-btn { 
+            width: 100%; 
+            padding: 15px; 
+            background: #E55039; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .contact-btns { display: none; gap: 10px; margin-top: 15px; }
+        .contact-btns.show { display: flex; }
+        .call-btn, .wa-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            color: white;
+        }
+        .call-btn { background: #0A3D62; }
+        .wa-btn { background: #25D366; }
+        
+        .complaint-box { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        .complaint-box h3 { color: #0A3D62; margin-bottom: 10px; }
+        .complaint-box textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            min-height: 80px;
+            margin-bottom: 10px;
+        }
+        .complaint-btn { 
+            padding: 10px 20px; 
+            background: #E55039; 
+            color: white; 
+            border: none; 
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .no-result { 
+            text-align: center; 
+            padding: 40px 20px; 
+            color: #666;
+            display: none;
+        }
+        .no-result.show { display: block; }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <h1>FindIt PH</h1>
-    <p>Find Real Businesses in Port Harcourt</p>
-    <button class="btn" onclick="location.href='register.html'">+ List Your Business FREE</button>
-  </div>
+    <div class="container">
+        <div class="header">
+            <h1>FindIt PH</h1>
+            <p>Search for trusted services in Port Harcourt</p>
+        </div>
 
-  <div id="business-list"></div>
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by business name, category, or area...">
+            <button class="search-btn" onclick="searchBusiness()">Search Business</button>
+            <button class="register-btn" onclick="window.location.href='register.html'">+ Register Your Business FREE</button>
+        </div>
 
-  <div class="card">
-    <h3>Report a Business</h3>
-    <input type="text" id="report-name" placeholder="Business Name">
-    <textarea id="report-issue" placeholder="What happened?"></textarea>
-    <button class="btn" onclick="submitComplaint()">Submit Complaint</button>
-  </div>
+        <div id="resultCard" class="result-card">
+            <div class="biz-name" id="bizName"></div>
+            <div class="biz-cat" id="bizCat"></div>
+            <div class="biz-area" id="bizArea"></div>
+            <div class="phone" id="phoneNumber"></div>
+            <button class="unlock-btn" id="unlockBtn" onclick="payToUnlock()">Pay ₦<span id="priceText">100</span> to Unlock</button>
+            <div class="contact-btns" id="contactBtns">
+                <a href="#" class="call-btn" id="callBtn">📞 Call Now</a>
+                <a href="#" class="wa-btn" id="waBtn">💬 WhatsApp</a>
+            </div>
+        </div>
 
-<script>
-// Sample businesses - Replace with real data later
-let businesses = [
-  {id: 1, name: "PH Electrical Services", category: "Electrician", location: "Rumuola", phone: "08012345678", whatsapp: "2348012345678"},
-  {id: 2, name: "Grace Hair Salon", category: "Salon", location: "GRA Phase 2", phone: "09087654321", whatsapp: "2349087654321"}
-];
+        <div id="noResult" class="no-result">
+            <h3>No business found</h3>
+            <p>Try searching with different keywords or register a new business</p>
+        </div>
 
-// Check free trials
-let userTrials = localStorage.getItem('findit_trials') || FREE_TRIALS;
-localStorage.setItem('findit_trials', userTrials);
+        <div class="complaint-box">
+            <h3>Have a Complaint?</h3>
+            <textarea id="complaintText" placeholder="Tell us if you had a bad experience with any service..."></textarea>
+            <button class="complaint-btn" onclick="sendComplaint()">Send Complaint</button>
+        </div>
+    </div>
 
-function maskNumber(num) {
-  return num.slice(0,4) + '***' + num.slice(-4);
-}
+    <script>
+        // Sample businesses - Replace with real data later
+        const businesses = [
+            {
+                id: 1,
+                name: "PH Electrical Services",
+                category: "Electrician",
+                area: "D-Line",
+                phone: "08012345678"
+            },
+            {
+                id: 2,
+                name: "Grace Hair Salon",
+                category: "Beauty Salon",
+                area: "GRA",
+                phone: "08098765432"
+            }
+        ];
 
-function renderBusinesses() {
-  const unlocked = JSON.parse(localStorage.getItem('findit_unlocked') || '[]');
-  const list = document.getElementById('business-list');
-  list.innerHTML = '';
-  
-  businesses.forEach(biz => {
-    const isUnlocked = unlocked.includes(biz.id);
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `
-      <h3>${biz.name}</h3>
-      <p><b>Category:</b> ${biz.category} | <b>Area:</b> ${biz.location}</p>
-      <p><b>Phone:</b> ${isUnlocked ? biz.phone : maskNumber(biz.phone)}</p>
-      
-      ${isUnlocked ? `
-        <a href="tel:${biz.phone}"><button class="btn btn-call">📞 Call Now</button></a>
-        <a href="https://wa.me/${biz.whatsapp}"><button class="btn btn-wa">💬 WhatsApp</button></a>
-      ` : `
-        <button class="btn btn-unlock" onclick="unlockNumber(${biz.id})">
-          ${userTrials > 0 ? `Unlock FREE - ${userTrials} left` : `Unlock ₦${UNLOCK_FEE}`}
-        </button>
-      `}
-    `;
-    list.appendChild(div);
-  });
-}
+        let currentBiz = null;
 
-function unlockNumber(bizId) {
-  if (userTrials > 0) {
-    userTrials--;
-    localStorage.setItem('findit_trials', userTrials);
-    saveUnlock(bizId);
-    return;
-  }
-  
-  let handler = PaystackPop.setup({
-    key: PAYSTACK_PUBLIC_KEY,
-    email: 'customer@finditph.com',
-    amount: UNLOCK_FEE * 100,
-    currency: 'NGN',
-    ref: 'FINDIT_'+Math.floor(Math.random()*1000000000),
-    onClose: function(){ alert('Payment cancelled'); },
-    callback: function(response){
-      saveUnlock(bizId);
-      alert('Payment successful! Number unlocked.');
-    }
-  });
-  handler.openIframe();
-}
+        // Set price from config
+        document.getElementById('priceText').textContent = UNLOCK_PRICE;
 
-function saveUnlock(bizId) {
-  let unlocked = JSON.parse(localStorage.getItem('findit_unlocked') || '[]');
-  unlocked.push(bizId);
-  localStorage.setItem('findit_unlocked', JSON.stringify(unlocked));
-  renderBusinesses();
-}
+        function searchBusiness() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resultCard = document.getElementById('resultCard');
+            const noResult = document.getElementById('noResult');
+            
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
 
-function submitComplaint() {
-  const name = document.getElementById('report-name').value;
-  const issue = document.getElementById('report-issue').value;
-  if(!name || !issue) return alert('Fill all fields');
-  const msg = `FindIt PH Complaint:%0ABusiness: ${name}%0AIssue: ${issue}`;
-  window.open(`https://wa.me/${ADMIN_WHATSAPP}?text=${msg}`);
-}
+            // Find business
+            const found = businesses.find(b => 
+                b.name.toLowerCase().includes(query) || 
+                b.category.toLowerCase().includes(query) || 
+                b.area.toLowerCase().includes(query)
+            );
 
-renderBusinesses();
-</script>
+            if (found) {
+                currentBiz = found;
+                document.getElementById('bizName').textContent = found.name;
+                document.getElementById('bizCat').textContent = found.category;
+                document.getElementById('bizArea').textContent = found.area;
+                document.getElementById('phoneNumber').textContent = maskPhone(found.phone);
+                document.getElementById('unlockBtn').style.display = 'block';
+                document.getElementById('contactBtns').classList.remove('show');
+                resultCard.classList.add('show');
+                noResult.classList.remove('show');
+            } else {
+                resultCard.classList.remove('show');
+                noResult.classList.add('show');
+            }
+        }
+
+        function maskPhone(phone) {
+            return phone.substring(0, 4) + '***' + phone.substring(7);
+        }
+
+        function payToUnlock() {
+            let handler = PaystackPop.setup({
+                key: PAYSTACK_PUBLIC_KEY,
+                email: 'user@example.com',
+                amount: UNLOCK_PRICE * 100,
+                currency: 'NGN',
+                ref: 'FINDIT_' + Date.now(),
+                callback: function(response) {
+                    unlockNumber();
+                },
+                onClose: function() {
+                    alert('Payment cancelled');
+                }
+            });
+            handler.openIframe();
+        }
+
+        function unlockNumber() {
+            document.getElementById('phoneNumber').textContent = currentBiz.phone;
+            document.getElementById('unlockBtn').style.display = 'none';
+            document.getElementById('callBtn').href = 'tel:' + currentBiz.phone;
+            document.getElementById('waBtn').href = 'https://wa.me/' + currentBiz.phone.replace('0', '234');
+            document.getElementById('contactBtns').classList.add('show');
+        }
+
+        function sendComplaint() {
+            const text = document.getElementById('complaintText').value.trim();
+            if (!text) {
+                alert('Please enter your complaint');
+                return;
+            }
+            const msg = encodeURIComponent('FindIt PH Complaint: ' + text);
+            window.open('https://wa.me/' + ADMIN_WHATSAPP + '?text=' + msg, '_blank');
+            document.getElementById('complaintText').value = '';
+            alert('Complaint sent to Admin');
+        }
+
+        // Enter key to search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchBusiness();
+        });
+    </script>
 </body>
 </html>
