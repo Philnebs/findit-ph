@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindIt Port Harcourt - Search Any Service</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .header { text-align: center; background: #2c3e50; color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }
+        .search-box { max-width: 600px; margin: 0 auto 30px auto; display: flex; gap: 10px; }
+        .search-box input { flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .search-box button { background: #00C853; color: white; border: none; padding: 15px 25px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .search-box button:hover { background: #00A843; }
+        .results { max-width: 800px; margin: 0 auto; }
+        .business-card { background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .business-name { font-size: 20px; font-weight: bold; color: #2c3e50; margin: 0 0 5px 0; }
+        .category { background: #3498db; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; display: inline-block; }
+        .address { color: #7f8c8d; margin: 10px 0; }
+        .unlock-btn { background: #FF6D00; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .unlock-btn:hover { background: #E65100; }
+        .loading { text-align: center; padding: 40px; color: #7f8c8d; }
+        .no-results { text-align: center; padding: 40px; color: #e74c3c; }
+        .search-prompt { text-align: center; padding: 40px; color: #7f8c8d; }
+        .register-link { text-align: center; margin-top: 40px; }
+        .register-link a { color: #00C853; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>FindIt Port Harcourt</h1>
+        <p>Type anything: "plumber", "toyota mechanic", "food", "hair salon"...</p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="What service do you need? e.g plumber, mechanic, food" onkeypress="if(event.key==='Enter') searchBusinesses()">
+        <button onclick="searchBusinesses()">Search</button>
+    </div>
+
+    <div id="results" class="results">
+        <div class="search-prompt">
+            <h3>🔍 Search for any service in Port Harcourt</h3>
+            <p>Type "plumber", "mechanic", "mama put", "phone repair" or anything you need</p>
+        </div>
+    </div>
+
+    <div class="register-link">
+        <p>Own a business? <a href="register.html">Register for FREE here</a></p>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3PfjfnBDe6atBpDuqIQg7lISUKu2YuFw",
+            authDomain: "findit-ph-e1d0f.firebaseapp.com",
+            databaseURL: "https://findit-ph-e1d0f-default-rtdb.firebaseio.com",
+            projectId: "findit-ph-e1d0f",
+            storageBucket: "findit-ph-e1d0f.firebasestorage.app",
+            messagingSenderId: "18398015033",
+            appId: "1:18398015033:web:53a46e7e32b7f6cdeb27e8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.searchBusinesses = async function() {
+            const resultsDiv = document.getElementById('results');
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                resultsDiv.innerHTML = '<div class="no-results">⚠️ Please type what you are looking for</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
+
+            try {
+                // Get all approved businesses first
+                const q = query(collection(db, "businesses"), where("status", "==", "approved"));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    resultsDiv.innerHTML = '<div class="no-results">No approved businesses yet. Check back later!</div>';
+                    return;
+                }
+
+                // Filter by search term - check businessName, category, description, address
+                let html = '';
+                let found = 0;
+                
+                querySnapshot.forEach((doc) => {
+                    const biz = doc.data();
+                    const searchableText = `
+                        ${biz.businessName} 
+                        ${biz.category} 
+                        ${biz.description} 
+                        ${biz.address}
+                    `.toLowerCase();
+                    
+                    // If search term dey inside any field, show am
+                    if (searchableText.includes(searchTerm)) {
+                        found++;
+                        html += `
+                            <div class="business-card">
+                                <p class="business-name">${biz.businessName}</p>
+                                <span class="category">${biz.category}</span>
+                                <p class="address">📍 ${biz.address}</p>
+                                <p>${biz.description || 'No description provided'}</p>
+                                <button class="unlock-btn" onclick="alert('Pay ₦500 to unlock: ${biz.phoneNumber} - Paystack coming next!')">
+                                    Unlock Phone Number - ₦500
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+                
+                if (found === 0) {
+                    resultsDiv.innerHTML = `<div class="no-results">No results found for "${searchTerm}". Try different keywords or check spelling.</div>`;
+                } else {
+                    resultsDiv.innerHTML = html;
+                }
+
+            } catch (error) {
+                console.error("Error searching: ", error);
+                resultsDiv.innerHTML = '<div class="no-results">Error searching. Refresh page.</div>';
+            }
+        }
+    </script>
+</body>
+</html>
