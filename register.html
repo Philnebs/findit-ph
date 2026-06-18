@@ -6,11 +6,18 @@
   <title>Register Business - FindIt PH</title>
   <script src="config.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 15px; }
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 15px; background: #f8fafc; }
     .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-    .btn { background: #16a34a; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; }
-    .free-badge { background: #dcfce7; color: #166534; padding: 8px; border-radius: 6px; text-align: center; margin: 10px 0; }
+    input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .btn { background: #16a34a; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btn:active { background: #15803d; }
+    .free-badge { background: #dcfce7; color: #166534; padding: 8px; border-radius: 6px; text-align: center; margin: 10px 0; font-weight: 600; }
+    .warning-box { background: #fef3c7; border: 1px solid #fbbf24; padding: 12px; border-radius: 6px; margin: 15px 0; font-size: 14px; }
+    .file-label { display: block; font-weight: 600; margin-top: 15px; margin-bottom: 5px; color: #374151; }
+    .file-note { font-size: 12px; color: #6b7280; margin-top: -5px; margin-bottom: 10px; }
+    .checkbox-wrap { display: flex; align-items: start; margin: 15px 0; gap: 8px; }
+    .checkbox-wrap input { width: auto; margin: 3px 0 0 0; }
+    .checkbox-wrap label { font-size: 14px; margin: 0; }
   </style>
 </head>
 <body>
@@ -18,28 +25,59 @@
     <h2>List Your Business on FindIt PH</h2>
     <div class="free-badge">🎉 100% FREE for Early Businesses!</div>
     
+    <div class="warning-box">
+      <strong>⚠️ VERIFICATION REQUIRED</strong><br>
+      For customer safety, we verify all businesses before listing. Upload clear photos below.
+    </div>
+    
     <form id="regForm">
-      <input type="text" id="bizName" placeholder="Business Name" required>
-      <input type="text" id="bizCat" placeholder="Category e.g. Plumber, Salon" required>
-      <input type="text" id="bizLoc" placeholder="Location e.g. Rumuola, GRA" required>
-      <input type="tel" id="bizPhone" placeholder="Phone Number 080..." required>
-      <input type="tel" id="bizWA" placeholder="WhatsApp Number 23480..." required>
-      <button type="submit" class="btn">Submit FREE Listing</button>
+      <input type="text" id="bizName" placeholder="Business Name *" required>
+      <input type="text" id="bizCat" placeholder="Category e.g. Plumber, Salon *" required>
+      <input type="text" id="bizLoc" placeholder="Location e.g. Rumuola, GRA *" required>
+      <input type="tel" id="bizPhone" placeholder="Phone Number 080... *" required>
+      <input type="tel" id="bizWA" placeholder="WhatsApp Number 23480... *" required>
+      <textarea id="bizDesc" placeholder="Short description of your service" rows="2"></textarea>
+      
+      <label class="file-label">Government ID *</label>
+      <input type="file" id="bizID" accept="image/*" required>
+      <div class="file-note">Upload NIN, Driver's License, or Voter's Card. Clear photo only.</div>
+      
+      <label class="file-label">Your Photo / Shop Photo *</label>
+      <input type="file" id="bizPhoto" accept="image/*" required>
+      <div class="file-note">Photo of you OR your shop. Customers need to know who they're calling.</div>
+      
+      <div class="checkbox-wrap">
+        <input type="checkbox" id="agree" required>
+        <label for="agree">I confirm I am the business owner and all details are true. I agree FindIt PH can verify my identity.</label>
+      </div>
+      
+      <button type="submit" class="btn">Submit for Verification</button>
     </form>
   </div>
 
 <script>
 document.getElementById('regForm').onsubmit = function(e) {
   e.preventDefault();
+  
   const name = document.getElementById('bizName').value;
   const cat = document.getElementById('bizCat').value;
   const loc = document.getElementById('bizLoc').value;
   const phone = document.getElementById('bizPhone').value;
   const wa = document.getElementById('bizWA').value;
+  const desc = document.getElementById('bizDesc').value;
+  const hasID = document.getElementById('bizID').files.length > 0;
+  const hasPhoto = document.getElementById('bizPhoto').files.length > 0;
   
-  const msg = `NEW FindIt PH Listing:%0AName: ${name}%0ACategory: ${cat}%0ALocation: ${loc}%0APhone: ${phone}%0AWhatsApp: ${wa}`;
+  if (!hasID || !hasPhoto) {
+    alert('Please upload both ID and Photo for verification');
+    return;
+  }
+  
+  const msg = `NEW FindIt PH Listing - NEEDS VERIFICATION:%0A%0AName: ${name}%0ACategory: ${cat}%0ALocation: ${loc}%0APhone: ${phone}%0AWhatsApp: ${wa}%0ADescription: ${desc || 'None'}%0A%0A⚠️ BUSINESS OWNER: Please reply to this chat and attach:%0A1. Your Government ID photo%0A2. Your Photo/Shop Photo%0A%0AWe verify within 24hrs.`;
+  
   window.open(`https://wa.me/${ADMIN_WHATSAPP}?text=${msg}`);
-  alert('Submitted! We go review and add you in 24hrs.');
+  
+  alert('Step 1 Done! ✅ Now check WhatsApp and send us your ID + Photo to complete verification.');
   this.reset();
 };
 </script>
