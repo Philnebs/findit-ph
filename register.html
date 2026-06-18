@@ -1,112 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Your Business - FindIt Port Harcourt</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
-        .form-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { 
-            background: #00C853; /* NICE GREEN */ 
-            color: white; 
-            padding: 15px; 
-            border: none; 
-            border-radius: 5px; 
-            width: 100%; 
-            font-size: 16px; 
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover { background: #00A843; } /* Darker green on hover */
-        button:disabled { background: #95a5a6; cursor: not-allowed; }
-        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 10px 0; display: none; }
-        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 10px 0; display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Business - FindIt PH</title>
+  <script src="config.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 15px; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+    .btn { background: #16a34a; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; }
+    .free-badge { background: #dcfce7; color: #166534; padding: 8px; border-radius: 6px; text-align: center; margin: 10px 0; }
+  </style>
 </head>
 <body>
-    <div class="form-box">
-        <h1>Register Your Business on FindIt PH</h1>
-        <p>Get discovered by customers in Port Harcourt. Free listing!</p>
-        
-        <div id="successMsg" class="success">✅ Registration successful! We go review and approve within 24hrs.</div>
-        <div id="errorMsg" class="error">❌ Something went wrong. Try again or WhatsApp 08123456789</div>
-        
-        <form id="businessForm">
-            <input type="text" id="businessName" placeholder="Business Name" required>
-            <select id="category" required>
-                <option value="">Select Category</option>
-                <option value="Plumber">Plumber</option>
-                <option value="Electrician">Electrician</option>
-                <option value="Food">Food & Restaurant</option>
-                <option value="Fashion">Fashion & Tailor</option>
-                <option value="Mechanic">Mechanic</option>
-                <option value="Salon">Hair Salon/Barber</option>
-                <option value="Tech">Phone/Laptop Repair</option>
-                <option value="Other">Other</option>
-            </select>
-            <input type="tel" id="phoneNumber" placeholder="WhatsApp Phone Number e.g 08012345678" required>
-            <input type="text" id="address" placeholder="Business Address in Port Harcourt" required>
-            <textarea id="description" placeholder="Describe your business/services" rows="3"></textarea>
-            <button type="submit" id="submitBtn">Submit Registration</button>
-        </form>
-    </div>
+  <div class="card">
+    <h2>List Your Business on FindIt PH</h2>
+    <div class="free-badge">🎉 100% FREE for Early Businesses!</div>
+    
+    <form id="regForm">
+      <input type="text" id="bizName" placeholder="Business Name" required>
+      <input type="text" id="bizCat" placeholder="Category e.g. Plumber, Salon" required>
+      <input type="text" id="bizLoc" placeholder="Location e.g. Rumuola, GRA" required>
+      <input type="tel" id="bizPhone" placeholder="Phone Number 080..." required>
+      <input type="tel" id="bizWA" placeholder="WhatsApp Number 23480..." required>
+      <button type="submit" class="btn">Submit FREE Listing</button>
+    </form>
+  </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB3PfjfnBDe6atBpDuqIQg7lISUKu2YuFw",
-            authDomain: "findit-ph-e1d0f.firebaseapp.com",
-            databaseURL: "https://findit-ph-e1d0f-default-rtdb.firebaseio.com",
-            projectId: "findit-ph-e1d0f",
-            storageBucket: "findit-ph-e1d0f.firebasestorage.app",
-            messagingSenderId: "18398015033",
-            appId: "1:18398015033:web:53a46e7e32b7f6cdeb27e8"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        document.getElementById('businessForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const successMsg = document.getElementById('successMsg');
-            const errorMsg = document.getElementById('errorMsg');
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            successMsg.style.display = 'none';
-            errorMsg.style.display = 'none';
-
-            try {
-                await addDoc(collection(db, "businesses"), {
-                    businessName: document.getElementById('businessName').value,
-                    category: document.getElementById('category').value,
-                    phoneNumber: document.getElementById('phoneNumber').value,
-                    address: document.getElementById('address').value,
-                    description: document.getElementById('description').value,
-                    paid: false,
-                    status: "pending",
-                    dateRegistered: serverTimestamp()
-                });
-
-                successMsg.style.display = 'block';
-                document.getElementById('businessForm').reset();
-                
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                errorMsg.style.display = 'block';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Registration';
-            }
-        });
-    </script>
+<script>
+document.getElementById('regForm').onsubmit = function(e) {
+  e.preventDefault();
+  const name = document.getElementById('bizName').value;
+  const cat = document.getElementById('bizCat').value;
+  const loc = document.getElementById('bizLoc').value;
+  const phone = document.getElementById('bizPhone').value;
+  const wa = document.getElementById('bizWA').value;
+  
+  const msg = `NEW FindIt PH Listing:%0AName: ${name}%0ACategory: ${cat}%0ALocation: ${loc}%0APhone: ${phone}%0AWhatsApp: ${wa}`;
+  window.open(`https://wa.me/${ADMIN_WHATSAPP}?text=${msg}`);
+  alert('Submitted! We go review and add you in 24hrs.');
+  this.reset();
+};
+</script>
 </body>
 </html>
