@@ -3,71 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - FindIt PH</title>
+  <title>FindIT-PH Admin Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 15px; background: #f1f5f9; }
-   .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-   .pending { border-left: 4px solid #f59e0b; }
-   .approved { border-left: 4px solid #16a34a; }
-   .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; margin-right: 8px; }
-   .btn-approve { background: #16a34a; color: white; }
-   .btn-reject { background: #dc2626; color: white; }
-    img { max-width: 120px; border-radius: 6px; margin: 5px 0; }
-    h2 { color: #1e293b; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #333; text-align: center; }
+    .tabs { display: flex; gap: 10px; margin: 20px 0; }
+    .tab { padding: 10px 20px; background: #ddd; border: none; cursor: pointer; border-radius: 5px; }
+    .tab.active { background: #007bff; color: white; }
+    .card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .card h3 { margin: 0 0 10px 0; color: #007bff; }
+    .card p { margin: 5px 0; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+    .pending { background: #ffc107; color: #000; }
+    .approved { background: #28a745; color: white; }
+    .rejected { background: #dc3545; color: white; }
+    .actions { margin-top: 10px; }
+    .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+    .btn-approve { background: #28a745; color: white; }
+    .btn-reject { background: #dc3545; color: white; }
+    .loading { text-align: center; padding: 40px; font-size: 18px; color: #666; }
   </style>
 </head>
 <body>
-  <h2>FindIt PH Admin Dashboard</h2>
-  <div id="list">Loading...</div>
+  <div class="container">
+    <h1>FindIt PH Admin Dashboard</h1>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="loadTab('pending')">Pending</button>
+      <button class="tab" onclick="loadTab('approved')">Approved</button>
+      <button class="tab" onclick="loadTab('rejected')">Rejected</button>
+      <button class="tab" onclick="loadTab('all')">All</button>
+    </div>
+    
+    <div id="list" class="loading">Loading...</div>
+  </div>
 
-<script type="module">
-import { db, collection, getDocs, updateDoc, doc, query, where } from './firebase.js';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig } from './firebase.js';
 
-async function loadArtisans() {
-  const q = query(collection(db, "artisans"), where("status", "==", "pending"));
-  const snap = await getDocs(q);
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  
-  if (snap.empty) {
-    list.innerHTML = '<div class="card">No pending registrations 🎉</div>';
-    return;
-  }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let currentTab = 'pending';
 
-  snap.forEach(docSnap => {
-    const d = docSnap.data();
-    const div = document.createElement('div');
-    div.className = 'card pending';
-    div.innerHTML = `
-      <h3>${d.name}</h3>
-      <p><b>Category:</b> ${d.cat} | <b>Location:</b> ${d.loc}</p>
-      <p><b>Phone:</b> ${d.phone} | <b>WhatsApp:</b> ${d.wa}</p>
-      <p><b>Description:</b> ${d.desc || 'None'}</p>
-      <div>
-        <b>ID:</b><br><img src="${d.idUrl}" alt="ID"><br>
-        <b>Photo:</b><br><img src="${d.photoUrl}" alt="Photo">
-      </div>
-      <br>
-      <button class="btn btn-approve" onclick="approve('${docSnap.id}')">✅ APPROVE</button>
-      <button class="btn btn-reject" onclick="reject('${docSnap.id}')">❌ REJECT</button>
-    `;
-    list.appendChild(div);
-  });
-}
+    async function loadTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      await loadArtisans();
+    }
 
-window.approve = async (id) => {
-  await updateDoc(doc(db, "artisans", id), { status: "approved" });
-  alert('Approved! User now shows in search.');
-  loadArtisans();
-}
+    async function loadArtisans() {
+      const list = document.getElementById('list');
+      list.innerHTML = '<div class="loading">Loading...</div>';
+      
+      try {
+        let q;
+        if (currentTab === 'all') {
+          q = query(collection(db, "artisans"));
+        } else {
+          q = query(collection(db, "artisans"), where("status", "==", currentTab));
+        }
+        
+        const snap = await getDocs(q);
+        list.innerHTML = '';
+        
+        if (snap.empty) {
+          list.innerHTML = `<div class="card">No ${currentTab} registrations 📋</div>`;
+          return;
+        }
 
-window.reject = async (id) => {
-  await updateDoc(doc(db, "artisans", id), { status: "rejected" });
-  alert('Rejected.');
-  loadArtisans();
-}
+        snap.forEach(docSnap => {
+          const data = docSnap.data();
+          const div = document.createElement('div');
+          div.className = 'card';
+          
+          const statusClass = data.status === 'approved' ? 'approved' : 
+                             data.status === 'rejected' ? 'rejected' : 'pending';
+          
+          div.innerHTML = `
+            <h3>${data.businessName || 'No Name'}</h3>
+            <span class="badge ${statusClass}">${data.status || 'pending'}</span>
+            <p><strong>Skill:</strong> ${data.skill || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>
+            <p><strong>WhatsApp:</strong> ${data.whatsapp || 'N/A'}</p>
+            <p><strong>Area:</strong> ${data.area || 'N/A'}</p>
+            <p><strong>Experience:</strong> ${data.experience || 'N/A'} years</p>
+            <p><strong>Address:</strong> ${data.address || 'N/A'}</p>
+            <p><strong>Bio:</strong> ${data.bio || 'N/A'}</p>
+            <p><strong>ID File:</strong> ${data.idFileName || 'None'}</p>
+            <p><strong>Photo File:</strong> ${data.photoFileName || 'None'}</p>
+            <p><strong>Date:</strong> ${data.date ? new Date(data.date).toLocaleString() : 'N/A'}</p>
+            ${data.status === 'pending' ? `
+              <div class="actions">
+                <button class="btn btn-approve" onclick="approveArtisan('${docSnap.id}')">Approve</button>
+                <button class="btn btn-reject" onclick="rejectArtisan('${docSnap.id}')">Reject</button>
+              </div>
+            ` : ''}
+          `;
+          list.appendChild(div);
+        });
+        
+      } catch (error) {
+        console.error('Error loading artisans:', error);
+        list.innerHTML = `<div class="card">Error: ${error.message}</div>`;
+      }
+    }
 
-loadArtisans();
-</script>
+    window.approveArtisan = async function(id) {
+      try {
+        await updateDoc(doc(db, "artisans", id), { status: "approved" });
+        alert("Approved! Business will now appear on main site.");
+        loadArtisans();
+      } catch (error) {
+        alert("Error approving: " + error.message);
+      }
+    }
+
+    window.rejectArtisan = async function(id) {
+      try {
+        await updateDoc(doc(db, "artisans", id), { status: "rejected" });
+        alert("Rejected");
+        loadArtisans();
+      } catch (error) {
+        alert("Error rejecting: " + error.message);
+      }
+    }
+
+    // Load pending on start
+    loadArtisans();
+  </script>
 </body>
 </html>
