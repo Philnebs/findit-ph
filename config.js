@@ -1,5 +1,5 @@
 // config.js
-const PAYSTACK_PUBLIC_KEY = "pk_live_YOUR_KEY_HERE"; 
+const PAYSTACK_PUBLIC_KEY = "pk_test_801bdf0827727162d12ad6750620ac3b31879424""; 
 const ADMIN_WHATSAPP = "2348107474626";
 
 // CHANGE PRICE HERE ONLY - Affects entire site
