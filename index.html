@@ -68,7 +68,7 @@
             display: none;
         }
         .result-card.show { display: block; }
-        .biz-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
+        .biz-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; background: #ddd; }
         .biz-name { font-size: 1.3rem; font-weight: bold; color: #0A3D62; }
         .biz-cat { color: #E55039; font-weight: bold; font-size: 0.9rem; margin: 5px 0; }
         .biz-area { color: #666; font-size: 0.9rem; }
@@ -150,7 +150,7 @@
         </div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search by business name, category, or area...">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by business name, skill, or area...">
             <button class="search-btn" onclick="searchBusiness()">Search Business</button>
             <button class="register-btn" onclick="window.location.href='register.html'">+ Register Your Business FREE</button>
         </div>
@@ -176,26 +176,28 @@ import { db, collection, getDocs, query, where } from './firebase.js';
 let allArtisans = [];
 let currentResults = [];
 
-// Set price from config.js
+// 1. LOAD ONLY APPROVED ARTISANS FROM FIREBASE
 document.addEventListener('DOMContentLoaded', () => {
   loadApprovedArtisans();
 });
 
-// 1. LOAD ONLY APPROVED ARTISANS FROM FIREBASE
 async function loadApprovedArtisans() {
   document.getElementById('loading').style.display = 'block';
   try {
     const q = query(collection(db, "artisans"), where("status", "==", "approved"));
     const snap = await getDocs(q);
     allArtisans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Show all approved artisans on page load
+    searchBusiness(); 
   } catch (err) {
     console.error("Error loading artisans:", err);
+    document.getElementById('resultsContainer').innerHTML = '<div class="result-card show">Error loading artisans. Check console.</div>';
   } finally {
     document.getElementById('loading').style.display = 'none';
   }
 }
 
-// 2. LIVE SEARCH FUNCTION
+// 2. LIVE SEARCH FUNCTION - FIXED FIELD NAMES
 window.searchBusiness = () => {
   const query = document.getElementById('searchInput').value.toLowerCase().trim();
   const resultsContainer = document.getElementById('resultsContainer');
@@ -203,18 +205,12 @@ window.searchBusiness = () => {
   
   resultsContainer.innerHTML = '';
   noResult.classList.remove('show');
-  
-  if (!query) {
-    alert('Please enter a search term');
-    return;
-  }
 
-  // Filter approved artisans
-  currentResults = allArtisans.filter(b => 
-    b.name.toLowerCase().includes(query) || 
-    b.cat.toLowerCase().includes(query) || 
-    b.loc.toLowerCase().includes(query)
-  );
+  // CHINEGBO FIX: Use correct field names from your Firestore
+  currentResults = allArtisans.filter(b => {
+    const searchString = `${b.businessName || ''} ${b.skill || ''} ${b.area || ''}`.toLowerCase();
+    return query === '' || searchString.includes(query);
+  });
 
   if (currentResults.length === 0) {
     noResult.classList.add('show');
@@ -226,20 +222,24 @@ window.searchBusiness = () => {
     const hasPaid = localStorage.getItem(`paid_${biz.id}`) === 'true';
     const card = document.createElement('div');
     card.className = 'result-card show';
+    
+    // CHINEGBO FIX: Use correct field names + fallback for photo
+    const photoUrl = biz.photoUrl || 'https://via.placeholder.com/80/0A3D62/FFFFFF?text=' + (biz.businessName?.charAt(0) || 'B');
+    
     card.innerHTML = `
-      <img src="${biz.photoUrl}" class="biz-photo" alt="${biz.name}">
-      <div class="biz-name">${biz.name}</div>
-      <div class="biz-cat">${biz.cat}</div>
-      <div class="biz-area">${biz.loc}</div>
-      <div class="biz-desc">${biz.desc || ''}</div>
+      <img src="${photoUrl}" class="biz-photo" alt="${biz.businessName}">
+      <div class="biz-name">${biz.businessName || 'No Name'}</div>
+      <div class="biz-cat">${biz.skill || 'N/A'}</div>
+      <div class="biz-area">${biz.area || 'N/A'}</div>
+      <div class="biz-desc">${biz.bio || ''}</div>
       <div class="phone">${hasPaid ? biz.phone : maskPhone(biz.phone)}</div>
       ${hasPaid ? `
         <div class="contact-btns show">
           <a href="tel:${biz.phone}" class="call-btn">📞 Call Now</a>
-          <a href="https://wa.me/${biz.wa}" class="wa-btn">💬 WhatsApp</a>
+          <a href="https://wa.me/${biz.whatsapp}" class="wa-btn">💬 WhatsApp</a>
         </div>
       ` : `
-        <button class="unlock-btn" onclick="payToUnlock('${biz.id}', '${biz.name}')">
+        <button class="unlock-btn" onclick="payToUnlock('${biz.id}', '${biz.businessName}')">
           Pay ₦${UNLOCK_PRICE} to Unlock Contact
         </button>
       `}
@@ -249,6 +249,7 @@ window.searchBusiness = () => {
 }
 
 function maskPhone(phone) {
+  if (!phone) return 'N/A';
   return phone.substring(0, 4) + '***' + phone.substring(7);
 }
 
@@ -257,14 +258,14 @@ window.payToUnlock = (artisanId, name) => {
   const handler = PaystackPop.setup({
     key: PAYSTACK_PUBLIC_KEY,
     email: 'customer@finditph.com',
-    amount: UNLOCK_PRICE * 100, // Convert to kobo
+    amount: UNLOCK_PRICE * 100,
     currency: 'NGN',
     ref: 'FINDIT_' + Date.now(),
     metadata: { artisanId, artisanName: name },
     callback: function(response) {
       localStorage.setItem(`paid_${artisanId}`, 'true');
       alert('Payment successful! Contact unlocked.');
-      searchBusiness(); // Refresh results to show unlocked
+      searchBusiness();
     },
     onClose: function() {
       alert('Payment cancelled');
