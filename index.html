@@ -68,9 +68,11 @@
             display: none;
         }
         .result-card.show { display: block; }
+        .biz-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
         .biz-name { font-size: 1.3rem; font-weight: bold; color: #0A3D62; }
         .biz-cat { color: #E55039; font-weight: bold; font-size: 0.9rem; margin: 5px 0; }
         .biz-area { color: #666; font-size: 0.9rem; }
+        .biz-desc { color: #444; font-size: 0.9rem; margin: 10px 0; }
         .phone { 
             font-size: 1.2rem; 
             font-weight: bold; 
@@ -137,6 +139,7 @@
             display: none;
         }
         .no-result.show { display: block; }
+        #loading { text-align: center; padding: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -152,17 +155,8 @@
             <button class="register-btn" onclick="window.location.href='register.html'">+ Register Your Business FREE</button>
         </div>
 
-        <div id="resultCard" class="result-card">
-            <div class="biz-name" id="bizName"></div>
-            <div class="biz-cat" id="bizCat"></div>
-            <div class="biz-area" id="bizArea"></div>
-            <div class="phone" id="phoneNumber"></div>
-            <button class="unlock-btn" id="unlockBtn" onclick="payToUnlock()">Pay ₦<span id="priceText">100</span> to Unlock</button>
-            <div class="contact-btns" id="contactBtns">
-                <a href="#" class="call-btn" id="callBtn">📞 Call Now</a>
-                <a href="#" class="wa-btn" id="waBtn">💬 WhatsApp</a>
-            </div>
-        </div>
+        <div id="loading">Loading artisans...</div>
+        <div id="resultsContainer"></div>
 
         <div id="noResult" class="no-result">
             <h3>No business found</h3>
@@ -176,108 +170,125 @@
         </div>
     </div>
 
-    <script>
-        // Sample businesses - Replace with real data later
-        const businesses = [
-            {
-                id: 1,
-                name: "PH Electrical Services",
-                category: "Electrician",
-                area: "D-Line",
-                phone: "08012345678"
-            },
-            {
-                id: 2,
-                name: "Grace Hair Salon",
-                category: "Beauty Salon",
-                area: "GRA",
-                phone: "08098765432"
-            }
-        ];
+<script type="module">
+import { db, collection, getDocs, query, where } from './firebase.js';
 
-        let currentBiz = null;
+let allArtisans = [];
+let currentResults = [];
 
-        // Set price from config
-        document.getElementById('priceText').textContent = UNLOCK_PRICE;
+// Set price from config.js
+document.addEventListener('DOMContentLoaded', () => {
+  loadApprovedArtisans();
+});
 
-        function searchBusiness() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            const resultCard = document.getElementById('resultCard');
-            const noResult = document.getElementById('noResult');
-            
-            if (!query) {
-                alert('Please enter a search term');
-                return;
-            }
+// 1. LOAD ONLY APPROVED ARTISANS FROM FIREBASE
+async function loadApprovedArtisans() {
+  document.getElementById('loading').style.display = 'block';
+  try {
+    const q = query(collection(db, "artisans"), where("status", "==", "approved"));
+    const snap = await getDocs(q);
+    allArtisans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("Error loading artisans:", err);
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
 
-            // Find business
-            const found = businesses.find(b => 
-                b.name.toLowerCase().includes(query) || 
-                b.category.toLowerCase().includes(query) || 
-                b.area.toLowerCase().includes(query)
-            );
+// 2. LIVE SEARCH FUNCTION
+window.searchBusiness = () => {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const resultsContainer = document.getElementById('resultsContainer');
+  const noResult = document.getElementById('noResult');
+  
+  resultsContainer.innerHTML = '';
+  noResult.classList.remove('show');
+  
+  if (!query) {
+    alert('Please enter a search term');
+    return;
+  }
 
-            if (found) {
-                currentBiz = found;
-                document.getElementById('bizName').textContent = found.name;
-                document.getElementById('bizCat').textContent = found.category;
-                document.getElementById('bizArea').textContent = found.area;
-                document.getElementById('phoneNumber').textContent = maskPhone(found.phone);
-                document.getElementById('unlockBtn').style.display = 'block';
-                document.getElementById('contactBtns').classList.remove('show');
-                resultCard.classList.add('show');
-                noResult.classList.remove('show');
-            } else {
-                resultCard.classList.remove('show');
-                noResult.classList.add('show');
-            }
-        }
+  // Filter approved artisans
+  currentResults = allArtisans.filter(b => 
+    b.name.toLowerCase().includes(query) || 
+    b.cat.toLowerCase().includes(query) || 
+    b.loc.toLowerCase().includes(query)
+  );
 
-        function maskPhone(phone) {
-            return phone.substring(0, 4) + '***' + phone.substring(7);
-        }
+  if (currentResults.length === 0) {
+    noResult.classList.add('show');
+    return;
+  }
 
-        function payToUnlock() {
-            let handler = PaystackPop.setup({
-                key: PAYSTACK_PUBLIC_KEY,
-                email: 'user@example.com',
-                amount: UNLOCK_PRICE * 100,
-                currency: 'NGN',
-                ref: 'FINDIT_' + Date.now(),
-                callback: function(response) {
-                    unlockNumber();
-                },
-                onClose: function() {
-                    alert('Payment cancelled');
-                }
-            });
-            handler.openIframe();
-        }
+  // Display all results
+  currentResults.forEach(biz => {
+    const hasPaid = localStorage.getItem(`paid_${biz.id}`) === 'true';
+    const card = document.createElement('div');
+    card.className = 'result-card show';
+    card.innerHTML = `
+      <img src="${biz.photoUrl}" class="biz-photo" alt="${biz.name}">
+      <div class="biz-name">${biz.name}</div>
+      <div class="biz-cat">${biz.cat}</div>
+      <div class="biz-area">${biz.loc}</div>
+      <div class="biz-desc">${biz.desc || ''}</div>
+      <div class="phone">${hasPaid ? biz.phone : maskPhone(biz.phone)}</div>
+      ${hasPaid ? `
+        <div class="contact-btns show">
+          <a href="tel:${biz.phone}" class="call-btn">📞 Call Now</a>
+          <a href="https://wa.me/${biz.wa}" class="wa-btn">💬 WhatsApp</a>
+        </div>
+      ` : `
+        <button class="unlock-btn" onclick="payToUnlock('${biz.id}', '${biz.name}')">
+          Pay ₦${UNLOCK_PRICE} to Unlock Contact
+        </button>
+      `}
+    `;
+    resultsContainer.appendChild(card);
+  });
+}
 
-        function unlockNumber() {
-            document.getElementById('phoneNumber').textContent = currentBiz.phone;
-            document.getElementById('unlockBtn').style.display = 'none';
-            document.getElementById('callBtn').href = 'tel:' + currentBiz.phone;
-            document.getElementById('waBtn').href = 'https://wa.me/' + currentBiz.phone.replace('0', '234');
-            document.getElementById('contactBtns').classList.add('show');
-        }
+function maskPhone(phone) {
+  return phone.substring(0, 4) + '***' + phone.substring(7);
+}
 
-        function sendComplaint() {
-            const text = document.getElementById('complaintText').value.trim();
-            if (!text) {
-                alert('Please enter your complaint');
-                return;
-            }
-            const msg = encodeURIComponent('FindIt PH Complaint: ' + text);
-            window.open('https://wa.me/' + ADMIN_WHATSAPP + '?text=' + msg, '_blank');
-            document.getElementById('complaintText').value = '';
-            alert('Complaint sent to Admin');
-        }
+// 3. PAYSTACK PAYWALL
+window.payToUnlock = (artisanId, name) => {
+  const handler = PaystackPop.setup({
+    key: PAYSTACK_PUBLIC_KEY,
+    email: 'customer@finditph.com',
+    amount: UNLOCK_PRICE * 100, // Convert to kobo
+    currency: 'NGN',
+    ref: 'FINDIT_' + Date.now(),
+    metadata: { artisanId, artisanName: name },
+    callback: function(response) {
+      localStorage.setItem(`paid_${artisanId}`, 'true');
+      alert('Payment successful! Contact unlocked.');
+      searchBusiness(); // Refresh results to show unlocked
+    },
+    onClose: function() {
+      alert('Payment cancelled');
+    }
+  });
+  handler.openIframe();
+}
 
-        // Enter key to search
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') searchBusiness();
-        });
-    </script>
+window.sendComplaint = () => {
+  const text = document.getElementById('complaintText').value.trim();
+  if (!text) {
+    alert('Please enter your complaint');
+    return;
+  }
+  const msg = encodeURIComponent('FindIt PH Complaint: ' + text);
+  window.open('https://wa.me/' + ADMIN_WHATSAPP + '?text=' + msg, '_blank');
+  document.getElementById('complaintText').value = '';
+  alert('Complaint sent to Admin');
+}
+
+// Enter key to search
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') searchBusiness();
+});
+</script>
 </body>
 </html>
