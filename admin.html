@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - FindIt PH</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 15px; background: #f1f5f9; }
+   .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+   .pending { border-left: 4px solid #f59e0b; }
+   .approved { border-left: 4px solid #16a34a; }
+   .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; margin-right: 8px; }
+   .btn-approve { background: #16a34a; color: white; }
+   .btn-reject { background: #dc2626; color: white; }
+    img { max-width: 120px; border-radius: 6px; margin: 5px 0; }
+    h2 { color: #1e293b; }
+  </style>
+</head>
+<body>
+  <h2>FindIt PH Admin Dashboard</h2>
+  <div id="list">Loading...</div>
+
+<script type="module">
+import { db, collection, getDocs, updateDoc, doc, query, where } from './firebase.js';
+
+async function loadArtisans() {
+  const q = query(collection(db, "artisans"), where("status", "==", "pending"));
+  const snap = await getDocs(q);
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  
+  if (snap.empty) {
+    list.innerHTML = '<div class="card">No pending registrations 🎉</div>';
+    return;
+  }
+
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
+    const div = document.createElement('div');
+    div.className = 'card pending';
+    div.innerHTML = `
+      <h3>${d.name}</h3>
+      <p><b>Category:</b> ${d.cat} | <b>Location:</b> ${d.loc}</p>
+      <p><b>Phone:</b> ${d.phone} | <b>WhatsApp:</b> ${d.wa}</p>
+      <p><b>Description:</b> ${d.desc || 'None'}</p>
+      <div>
+        <b>ID:</b><br><img src="${d.idUrl}" alt="ID"><br>
+        <b>Photo:</b><br><img src="${d.photoUrl}" alt="Photo">
+      </div>
+      <br>
+      <button class="btn btn-approve" onclick="approve('${docSnap.id}')">✅ APPROVE</button>
+      <button class="btn btn-reject" onclick="reject('${docSnap.id}')">❌ REJECT</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+window.approve = async (id) => {
+  await updateDoc(doc(db, "artisans", id), { status: "approved" });
+  alert('Approved! User now shows in search.');
+  loadArtisans();
+}
+
+window.reject = async (id) => {
+  await updateDoc(doc(db, "artisans", id), { status: "rejected" });
+  alert('Rejected.');
+  loadArtisans();
+}
+
+loadArtisans();
+</script>
+</body>
+</html>
