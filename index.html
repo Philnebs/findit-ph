@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FindIt-PH - Find Artisans in Port Harcourt</title>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
@@ -47,7 +48,6 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    #searchBtn:hover { background: #082c48; }
     #results {
       max-width: 800px;
       margin: 20px auto;
@@ -63,8 +63,42 @@
     .biz-name { font-size: 22px; font-weight: bold; color: #0A3D62; margin-bottom: 8px; }
     .biz-skill { color: #E67E22; font-weight: 600; margin: 5px 0; }
     .biz-area { color: #7f8c8d; margin: 5px 0; }
-    .biz-phone { color: #27ae60; font-weight: bold; margin-top: 10px; }
+    .contact-locked { 
+      background: #fff3cd; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-top: 15px;
+      border: 1px solid #ffeaa7;
+    }
+    .contact-unlocked {
+      background: #d4edda;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid #c3e6cb;
+    }
+    .pay-btn, .action-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 5px 5px 5px 0;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .pay-btn { background: #00C851; color: white; }
+    .call-btn { background: #3498db; color: white; }
+    .wa-btn { background: #25D366; color: white; }
+    .report-btn { background: #e74c3c; color: white; font-size: 14px; }
     #loading, #message { text-align: center; padding: 40px; font-size: 18px; color: #888; }
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      background: #0A3D62;
+      color: white;
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
@@ -85,10 +119,17 @@
     <div id="message">Search for artisans above to see results</div>
   </div>
 
+  <div class="footer">
+    <p>FindIt-PH © 2026</p>
+    <a href="" id="complainLink" class="action-btn report-btn" style="margin-top:15px;">
+      📱 Complain to Admin
+    </a>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { firebaseConfig } from './config.js';  // <-- THIS LINE IMPORTS YOUR config.js
+    import { firebaseConfig, PAYSTACK_PUBLIC_KEY, ADMIN_WHATSAPP, UNLOCK_PRICE } from './config.js';
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -97,15 +138,39 @@
     const searchBtn = document.getElementById('searchBtn');
     const resultsDiv = document.getElementById('results');
     const loadingDiv = document.getElementById('loading');
-    const messageDiv = document.getElementById('message');
+    
+    // Set complain link
+    document.getElementById('complainLink').href = `https://wa.me/${ADMIN_WHATSAPP}?text=Hi%20FindIt-PH%20Admin%2C%20I%20have%20a%20complaint`;
+
+    // Track unlocked artisans in this session
+    let unlockedArtisans = JSON.parse(sessionStorage.getItem('unlockedArtisans') || '[]');
+
+    function payToUnlock(artisanId, artisanName, artisanPhone) {
+      let handler = PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: 'customer@finditph.com', // You can collect real email later
+        amount: UNLOCK_PRICE * 100, // Amount in kobo
+        currency: 'NGN',
+        ref: 'FINDIT_' + Math.floor((Math.random() * 1000000000) + 1),
+        onClose: function(){
+          alert('Payment cancelled.');
+        },
+        callback: function(response){
+          // Payment successful
+          unlockedArtisans.push(artisanId);
+          sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
+          alert('Payment successful! Contact details unlocked.');
+          searchArtisans(); // Refresh to show unlocked contact
+        }
+      });
+      handler.openIframe();
+    }
 
     async function searchArtisans() {
       const searchTerm = searchInput.value.toLowerCase().trim();
       
       if (!searchTerm) {
-        messageDiv.innerHTML = 'Please enter a skill or area to search';
-        resultsDiv.innerHTML = '';
-        resultsDiv.appendChild(messageDiv);
+        resultsDiv.innerHTML = '<div id="message">Please enter a skill or area to search</div>';
         return;
       }
 
@@ -121,24 +186,52 @@
         
         querySnapshot.forEach((doc) => {
           const biz = doc.data();
-          const bizText = `${biz.businessName || ''} ${biz.skill || ''} ${biz.area || ''} ${biz.bio || ''}`.toLowerCase();
+          const artisanId = doc.id;
+          const bizText = `${biz.businessName || ''} ${biz.skill || ''} ${biz.businessType || ''} ${biz.area || ''} ${biz.bio || ''}`.toLowerCase();
           
           if (bizText.includes(searchTerm)) {
             found++;
+            const isUnlocked = unlockedArtisans.includes(artisanId);
+            const phone = biz.phone || '';
+            const cleanPhone = phone.replace(/\D/g, ''); // Remove non-digits for links
+            const whatsappLink = `https://wa.me/234${cleanPhone.substring(cleanPhone.length - 10)}?text=Hi%20${biz.businessName}%2C%20I%20found%20you%20on%20FindIt-PH`;
+            
             html += `
               <div class="card">
                 <div class="biz-name">${biz.businessName || 'No Name'}</div>
-                <div class="biz-skill">${biz.skill || 'No Skill Listed'}</div>
+                <div class="biz-skill">${biz.skill || biz.businessType || 'No Skill Listed'}</div>
                 <div class="biz-area">📍 ${biz.area || 'No Area Listed'}</div>
                 <div style="margin: 10px 0;">${biz.bio || ''}</div>
-                <div class="biz-phone">📞 ${biz.phone || 'No Phone'}</div>
+                
+                ${isUnlocked ? `
+                  <div class="contact-unlocked">
+                    <strong>Contact Unlocked:</strong><br>
+                    <a href="tel:${phone}" class="action-btn call-btn">📞 Call ${phone}</a>
+                    <a href="${whatsappLink}" target="_blank" class="action-btn wa-btn">💬 WhatsApp</a>
+                  </div>
+                ` : `
+                  <div class="contact-locked">
+                    <strong>Contact Hidden</strong><br>
+                    Pay ₦${UNLOCK_PRICE} to unlock phone & WhatsApp<br>
+                    <button class="pay-btn" onclick="payToUnlock('${artisanId}', '${biz.businessName}', '${phone}')">
+                      🔓 Unlock Contact - ₦${UNLOCK_PRICE}
+                    </button>
+                  </div>
+                `}
+                
+                <div style="margin-top:15px;">
+                  <a href="https://wa.me/${ADMIN_WHATSAPP}?text=Hi%20FindIt-PH%20Admin%2C%20I%20want%20to%20report%20${biz.businessName}" 
+                     target="_blank" class="action-btn report-btn">
+                     ⚠️ Report This Artisan
+                  </a>
+                </div>
               </div>
             `;
           }
         });
 
         if (found === 0) {
-          resultsDiv.innerHTML = `<div id="message">No artisans found for "${searchTerm}". Try another search.</div>`;
+          resultsDiv.innerHTML = `<div id="message">No artisans found for "${searchTerm}". Try "zainetcom" to test.</div>`;
         } else {
           resultsDiv.innerHTML = html;
         }
@@ -149,6 +242,9 @@
         console.error(error);
       }
     }
+
+    // Make payToUnlock available globally for onclick
+    window.payToUnlock = payToUnlock;
 
     searchBtn.addEventListener('click', searchArtisans);
     searchInput.addEventListener('keypress', (e) => {
