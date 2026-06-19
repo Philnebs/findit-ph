@@ -6,23 +6,23 @@
   <title>FindIT-PH Admin Dashboard</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .container { max-width: 1200px; margin: 0 auto; }
+   .container { max-width: 1200px; margin: 0 auto; }
     h1 { color: #333; text-align: center; }
-    .tabs { display: flex; gap: 10px; margin: 20px 0; }
-    .tab { padding: 10px 20px; background: #ddd; border: none; cursor: pointer; border-radius: 5px; }
-    .tab.active { background: #007bff; color: white; }
-    .card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .card h3 { margin: 0 0 10px 0; color: #007bff; }
-    .card p { margin: 5px 0; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-    .pending { background: #ffc107; color: #000; }
-    .approved { background: #28a745; color: white; }
-    .rejected { background: #dc3545; color: white; }
-    .actions { margin-top: 10px; }
-    .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
-    .btn-approve { background: #28a745; color: white; }
-    .btn-reject { background: #dc3545; color: white; }
-    .loading { text-align: center; padding: 40px; font-size: 18px; color: #666; }
+   .tabs { display: flex; gap: 10px; margin: 20px 0; }
+   .tab { padding: 10px 20px; background: #ddd; border: none; cursor: pointer; border-radius: 5px; }
+   .tab.active { background: #007bff; color: white; }
+   .card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+   .card h3 { margin: 0 0 10px 0; color: #007bff; }
+   .card p { margin: 5px 0; }
+   .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+   .pending { background: #ffc107; color: #000; }
+   .approved { background: #28a745; color: white; }
+   .rejected { background: #dc3545; color: white; }
+   .actions { margin-top: 10px; }
+   .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+   .btn-approve { background: #28a745; color: white; }
+   .btn-reject { background: #dc3545; color: white; }
+   .loading { text-align: center; padding: 40px; font-size: 18px; color: #666; }
   </style>
 </head>
 <body>
@@ -80,8 +80,8 @@
           const div = document.createElement('div');
           div.className = 'card';
           
-          const statusClass = data.status === 'approved' ? 'approved' : 
-                             data.status === 'rejected' ? 'rejected' : 'pending';
+          const statusClass = data.status === 'approved'? 'approved' : 
+                             data.status === 'rejected'? 'rejected' : 'pending';
           
           div.innerHTML = `
             <h3>${data.businessName || 'No Name'}</h3>
@@ -95,8 +95,8 @@
             <p><strong>Bio:</strong> ${data.bio || 'N/A'}</p>
             <p><strong>ID File:</strong> ${data.idFileName || 'None'}</p>
             <p><strong>Photo File:</strong> ${data.photoFileName || 'None'}</p>
-            <p><strong>Date:</strong> ${data.date ? new Date(data.date).toLocaleString() : 'N/A'}</p>
-            ${data.status === 'pending' ? `
+            <p><strong>Date:</strong> ${data.date? new Date(data.date).toLocaleString() : 'N/A'}</p>
+            ${data.status === 'pending'? `
               <div class="actions">
                 <button class="btn btn-approve" onclick="approveArtisan('${docSnap.id}')">Approve</button>
                 <button class="btn btn-reject" onclick="rejectArtisan('${docSnap.id}')">Reject</button>
@@ -112,11 +112,18 @@
       }
     }
 
+    // CHINEGBO - ONLY THIS FUNCTION CHANGED 👇
     window.approveArtisan = async function(id) {
       try {
         await updateDoc(doc(db, "artisans", id), { status: "approved" });
         alert("Approved! Business will now appear on main site.");
-        loadArtisans();
+        
+        // Auto-switch to Approved tab after approval
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab')[1].classList.add('active'); // Approved tab is 2nd button
+        currentTab = 'approved';
+        loadArtisans(); // Reload to show it moved
+        
       } catch (error) {
         alert("Error approving: " + error.message);
       }
@@ -126,7 +133,13 @@
       try {
         await updateDoc(doc(db, "artisans", id), { status: "rejected" });
         alert("Rejected");
+        
+        // Auto-switch to Rejected tab after rejection
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab')[2].classList.add('active'); // Rejected tab is 3rd button
+        currentTab = 'rejected';
         loadArtisans();
+        
       } catch (error) {
         alert("Error rejecting: " + error.message);
       }
