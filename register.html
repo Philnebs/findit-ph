@@ -3,116 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register Business - FindIt PH</title>
-  <script src="config.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 15px; background: #f8fafc; }
-   .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-   .btn { background: #16a34a; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 10px; }
-   .btn:disabled { background: #9ca3af; }
-   .free-badge { background: #dcfce7; color: #166534; padding: 8px; border-radius: 6px; text-align: center; margin: 10px 0; font-weight: 600; }
-   .warning-box { background: #fef3c7; border: 1px solid #fbbf24; padding: 12px; border-radius: 6px; margin: 15px 0; font-size: 14px; }
-   .file-label { display: block; font-weight: 600; margin-top: 15px; margin-bottom: 5px; color: #374151; }
-   .file-note { font-size: 12px; color: #6b7280; margin-top: -5px; margin-bottom: 10px; }
-   .checkbox-wrap { display: flex; align-items: start; margin: 15px 0; gap: 8px; }
-   .checkbox-wrap input { width: auto; margin: 3px 0 0 0; }
-   .checkbox-wrap label { font-size: 14px; margin: 0; }
-    #status { text-align: center; margin-top: 15px; font-weight: 600; }
-  </style>
+  <title>Register as Artisan - FindIT PH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="card">
-    <h2>List Your Business on FindIt PH</h2>
-    <div class="free-badge">🎉 100% FREE for Early Businesses!</div>
+<body class="bg-gray-50">
+  <div class="max-w-md mx-auto mt-6 p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-green-600 mb-2">Join FindIT PH</h1>
+    <p class="text-sm text-gray-600 mb-6">Real artisans only. Customers will contact you directly.</p>
     
-    <div class="warning-box">
-      <strong>⚠️ VERIFICATION REQUIRED</strong><br>
-      For customer safety, we verify all businesses before listing. Upload clear photos below.
-    </div>
-    
-    <form id="regForm">
-      <input type="text" id="bizName" placeholder="Business Name *" required>
-      <input type="text" id="bizCat" placeholder="Category e.g. Plumber, Salon *" required>
-      <input type="text" id="bizLoc" placeholder="Location e.g. Rumuola, GRA *" required>
-      <input type="tel" id="bizPhone" placeholder="Phone Number 080... *" required>
-      <input type="tel" id="bizWA" placeholder="WhatsApp Number 23480... *" required>
-      <textarea id="bizDesc" placeholder="Short description of your service" rows="2"></textarea>
+    <form id="registerForm">
+      <input type="text" id="firstName" placeholder="First Name" required class="w-full p-3 mb-4 border rounded">
       
-      <label class="file-label">Government ID *</label>
-      <input type="file" id="bizID" accept="image/*" required>
-      <div class="file-note">Upload NIN, Driver's License, or Voter's Card. Clear photo only.</div>
+      <input type="text" id="surname" placeholder="Surname" required class="w-full p-3 mb-4 border rounded">
       
-      <label class="file-label">Your Photo / Shop Photo *</label>
-      <input type="file" id="bizPhoto" accept="image/*" required>
-      <div class="file-note">Photo of you OR your shop. Customers need to know who they're calling.</div>
+      <input type="text" id="businessName" placeholder="Business Name (Optional) e.g Mama Chi Tailoring" class="w-full p-3 mb-4 border rounded">
       
-      <div class="checkbox-wrap">
-        <input type="checkbox" id="agree" required>
-        <label for="agree">I confirm I am the business owner and all details are true. I agree FindIt PH can verify my identity.</label>
+      <input type="text" id="skill" placeholder="Your Skill e.g Tailor, Plumber, Electrician" required class="w-full p-3 mb-4 border rounded">
+      
+      <input type="tel" id="phone" placeholder="WhatsApp Number e.g 0803..." required class="w-full p-3 mb-4 border rounded">
+      
+      <input type="text" id="area" placeholder="Your Area in Port Harcourt e.g Rumuola, Diobu, GRA" required class="w-full p-3 mb-4 border rounded">
+      
+      <!-- TERMS AND CONDITIONS -->
+      <div class="flex items-start mb-6">
+        <input type="checkbox" id="terms" required class="mt-1 mr-3">
+        <label for="terms" class="text-sm text-gray-700">
+          I confirm all details are true. I agree to the 
+          <a href="terms.html" target="_blank" class="text-green-600 underline">Terms & Conditions</a>. 
+          I understand FindIT PH will share my contact with paying customers.
+        </label>
       </div>
       
-      <button type="submit" class="btn" id="submitBtn">Submit for Verification</button>
-      <div id="status"></div>
+      <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white p-3 rounded font-bold">
+        Register Now
+      </button>
     </form>
+    
+    <p id="status" class="mt-4 text-center"></p>
   </div>
 
-<script type="module">
-import { db, storage, collection, addDoc, ref, uploadBytes, getDownloadURL } from './firebase.js';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { firebaseConfig } from './firebase.js';
 
-document.getElementById('regForm').onsubmit = async function(e) {
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  const status = document.getElementById('status');
-  btn.disabled = true;
-  btn.textContent = 'Uploading...';
-  status.textContent = '';
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  try {
-    const name = document.getElementById('bizName').value;
-    const cat = document.getElementById('bizCat').value;
-    const loc = document.getElementById('bizLoc').value;
-    const phone = document.getElementById('bizPhone').value;
-    const wa = document.getElementById('bizWA').value;
-    const desc = document.getElementById('bizDesc').value;
-    const idFile = document.getElementById('bizID').files[0];
-    const photoFile = document.getElementById('bizPhoto').files[0];
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const btn = document.getElementById('submitBtn');
+      const status = document.getElementById('status');
+      
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+      status.textContent = '';
 
-    // 1. Upload ID to Firebase Storage
-    const idRef = ref(storage, `ids/${Date.now()}_${idFile.name}`);
-    await uploadBytes(idRef, idFile);
-    const idUrl = await getDownloadURL(idRef);
-
-    // 2. Upload Photo to Firebase Storage 
-    const photoRef = ref(storage, `photos/${Date.now()}_${photoFile.name}`);
-    await uploadBytes(photoRef, photoFile);
-    const photoUrl = await getDownloadURL(photoRef);
-
-    // 3. Save all data to Firestore
-    await addDoc(collection(db, "artisans"), {
-      name, cat, loc, phone, wa, desc,
-      idUrl, photoUrl,
-      status: "pending",
-      createdAt: new Date()
+      try {
+        await addDoc(collection(db, "artisans"), {
+          firstName: document.getElementById('firstName').value,
+          surname: document.getElementById('surname').value,
+          businessName: document.getElementById('businessName').value || "None",
+          skill: document.getElementById('skill').value,
+          phone: document.getElementById('phone').value,
+          area: document.getElementById('area').value,
+          date: new Date().toISOString(),
+          termsAccepted: true
+        });
+        
+        status.className = 'mt-4 text-center text-green-600 font-bold';
+        status.textContent = 'Success! You are now listed on FindIT PH. Customers will contact you soon.';
+        document.getElementById('registerForm').reset();
+        
+      } catch (error) {
+        status.className = 'mt-4 text-center text-red-600';
+        status.textContent = 'Error: ' + error.message;
+      }
+      
+      btn.disabled = false;
+      btn.textContent = 'Register Now';
     });
-
-    status.style.color = '#16a34a';
-    status.textContent = '✅ Submitted! We will verify within 24hrs.';
-    this.reset();
-    
-    // Optional: Notify you on WhatsApp
-    const msg = `NEW FindIt PH Registration:%0AName: ${name}%0ACategory: ${cat}%0ACheck admin panel to approve.`;
-    window.open(`https://wa.me/${ADMIN_WHATSAPP}?text=${msg}`);
-
-  } catch (err) {
-    status.style.color = '#dc2626';
-    status.textContent = '❌ Error. Please try again or check connection.';
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Submit for Verification';
-  }
-};
-</script>
+  </script>
 </body>
 </html>
