@@ -224,10 +224,10 @@ window.searchBusiness = () => {
     card.className = 'result-card show';
     
     // CHINEGBO FIX: Use correct field names + fallback for photo
-    const photoUrl = biz.photoUrl || 'https://via.placeholder.com/80/0A3D62/FFFFFF?text=' + (biz.businessName?.charAt(0) || 'B');
+    //const photoUrl = biz.photoUrl || 'https://via.placeholder.com/80/0A3D62/FFFFFF?text=' + (biz.businessName?.charAt(0) || 'B');
     
     card.innerHTML = `
-      <img src="${photoUrl}" class="biz-photo" alt="${biz.businessName}">
+      <!-- <img src="${photoUrl}" class="biz-photo" alt="${biz.businessName}">
       <div class="biz-name">${biz.businessName || 'No Name'}</div>
       <div class="biz-cat">${biz.skill || 'N/A'}</div>
       <div class="biz-area">${biz.area || 'N/A'}</div>
