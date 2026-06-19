@@ -1,11 +1,12 @@
 // config.js
 export const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
+  apiKey: "AIzaSyB3PfjfnBDe6atBpDuqIQg7lISUKu2YuFw",
   authDomain: "findit-ph-e1d0f.firebaseapp.com",
+  databaseURL: "https://findit-ph-e1d0f-default-rtdb.firebaseio.com",
   projectId: "findit-ph-e1d0f",
-  storageBucket: "findit-ph-e1d0f.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  storageBucket: "findit-ph-e1d0f.firebasestorage.app",
+  messagingSenderId: "18398015033",
+  appId: "1:18398015033:web:53a46e7e32b7f6cdeb27e8"
 };
 
 // Your Paystack stuff can stay below if you want
