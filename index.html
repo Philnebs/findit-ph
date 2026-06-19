@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadApprovedArtisans() {
   document.getElementById('loading').style.display = 'block';
   try {
-    const q = query(collection(db, "artisans"), where("status", "==", "approved"));
+    const q = query(collection(db, "artisans"))
     const snap = await getDocs(q);
     allArtisans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     // Show all approved artisans on page load
