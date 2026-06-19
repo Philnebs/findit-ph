@@ -5,12 +5,14 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 
 // REPLACE WITH YOUR FIREBASE CONFIG FROM PROJECT SETTINGS
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB3PfjfnBDe6atBpDuqIQg7lISUKu2YuFw",
+  authDomain: "findit-ph-e1d0f.firebaseapp.com",
+  databaseURL: "https://findit-ph-e1d0f-default-rtdb.firebaseio.com",
+  projectId: "findit-ph-e1d0f",
+  storageBucket: "findit-ph-e1d0f.firebasestorage.app",
+  messagingSenderId: "18398015033",
+  appId: "1:18398015033:web:53a46e7e32b7f6cdeb27e8"
+};
 };
 
 const app = initializeApp(firebaseConfig);
