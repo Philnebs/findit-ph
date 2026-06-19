@@ -1,295 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindIt PH - Search Services</title>
-    <script src="https://js.paystack.co/v1/inline.js"></script>
-    <script src="config.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #f5f5f5; 
-            padding: 20px;
-        }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { color: #0A3D62; font-size: 2rem; }
-        .header p { color: #666; margin-top: 5px; }
-        
-        .search-box { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .search-input { 
-            width: 100%; 
-            padding: 15px; 
-            font-size: 16px; 
-            border: 2px solid #ddd; 
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .search-btn { 
-            width: 100%; 
-            padding: 15px; 
-            background: #0A3D62; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .search-btn:hover { background: #062940; }
-        
-        .register-btn { 
-            width: 100%; 
-            padding: 12px; 
-            background: #25D366; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        .result-card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-top: 20px;
-            display: none;
-        }
-        .result-card.show { display: block; }
-        .biz-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; background: #ddd; }
-        .biz-name { font-size: 1.3rem; font-weight: bold; color: #0A3D62; }
-        .biz-cat { color: #E55039; font-weight: bold; font-size: 0.9rem; margin: 5px 0; }
-        .biz-area { color: #666; font-size: 0.9rem; }
-        .biz-desc { color: #444; font-size: 0.9rem; margin: 10px 0; }
-        .phone { 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            margin: 15px 0; 
-            color: #333;
-        }
-        .unlock-btn { 
-            width: 100%; 
-            padding: 15px; 
-            background: #E55039; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .contact-btns { display: none; gap: 10px; margin-top: 15px; }
-        .contact-btns.show { display: flex; }
-        .call-btn, .wa-btn { 
-            flex: 1; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            color: white;
-        }
-        .call-btn { background: #0A3D62; }
-        .wa-btn { background: #25D366; }
-        
-        .complaint-box { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-top: 30px;
-        }
-        .complaint-box h3 { color: #0A3D62; margin-bottom: 10px; }
-        .complaint-box textarea { 
-            width: 100%; 
-            padding: 10px; 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            min-height: 80px;
-            margin-bottom: 10px;
-        }
-        .complaint-btn { 
-            padding: 10px 20px; 
-            background: #E55039; 
-            color: white; 
-            border: none; 
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        
-        .no-result { 
-            text-align: center; 
-            padding: 40px 20px; 
-            color: #666;
-            display: none;
-        }
-        .no-result.show { display: block; }
-        #loading { text-align: center; padding: 20px; display: none; }
-    </style>
+  <title>FindIt-PH</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    .card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .biz-name { font-size: 20px; font-weight: bold; color: #0A3D62; }
+    .biz-skill { color: #555; margin: 5px 0; }
+    .biz-area { color: #888; }
+    .biz-phone { color: green; font-weight: bold; }
+    #loading { text-align: center; font-size: 18px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>FindIt PH</h1>
-            <p>Search for trusted services in Port Harcourt</p>
-        </div>
+  <h1>FindIt-PH - Artisans</h1>
+  <div id="loading">Loading artisans...</div>
+  <div id="results"></div>
 
-        <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search by business name, skill, or area...">
-            <button class="search-btn" onclick="searchBusiness()">Search Business</button>
-            <button class="register-btn" onclick="window.location.href='register.html'">+ Register Your Business FREE</button>
-        </div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        <div id="loading">Loading artisans...</div>
-        <div id="resultsContainer"></div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxxxxxxxxxxxxxxxxxxx",
+      authDomain: "findit-ph-e1d0f.firebaseapp.com",
+      projectId: "findit-ph-e1d0f",
+      storageBucket: "findit-ph-e1d0f.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:xxxxxxxx"
+    };
 
-        <div id="noResult" class="no-result">
-            <h3>No business found</h3>
-            <p>Try searching with different keywords or register a new business</p>
-        </div>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        <div class="complaint-box">
-            <h3>Have a Complaint?</h3>
-            <textarea id="complaintText" placeholder="Tell us if you had a bad experience with any service..."></textarea>
-            <button class="complaint-btn" onclick="sendComplaint()">Send Complaint</button>
-        </div>
-    </div>
+    async function loadArtisans() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "artisans"));
+        const resultsDiv = document.getElementById('results');
+        document.getElementById('loading').style.display = 'none';
+        
+        if (querySnapshot.empty) {
+          resultsDiv.innerHTML = '<p>No artisans found in database.</p>';
+          return;
+        }
 
-<script type="module">
-import { db, collection, getDocs, query, where } from './firebase.js';
-
-let allArtisans = [];
-let currentResults = [];
-
-// 1. LOAD ONLY APPROVED ARTISANS FROM FIREBASE
-document.addEventListener('DOMContentLoaded', () => {
-  loadApprovedArtisans();
-});
-
-async function loadApprovedArtisans() {
-  document.getElementById('loading').style.display = 'block';
-  try {
-    const q = query(collection(db, "artisans"))
-    const snap = await getDocs(q);
-    allArtisans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    // Show all approved artisans on page load
-    searchBusiness(); 
-  } catch (err) {
-    console.error("Error loading artisans:", err);
-    document.getElementById('resultsContainer').innerHTML = '<div class="result-card show">Error loading artisans. Check console.</div>';
-  } finally {
-    document.getElementById('loading').style.display = 'none';
-  }
-}
-
-// 2. LIVE SEARCH FUNCTION - FIXED FIELD NAMES
-window.searchBusiness = () => {
-  const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  const resultsContainer = document.getElementById('resultsContainer');
-  const noResult = document.getElementById('noResult');
-  
-  resultsContainer.innerHTML = '';
-  noResult.classList.remove('show');
-
-  // CHINEGBO FIX: Use correct field names from your Firestore
-  currentResults = allArtisans.filter(b => {
-    const searchString = `${b.businessName || ''} ${b.skill || ''} ${b.area || ''}`.toLowerCase();
-    return query === '' || searchString.includes(query);
-  });
-
-  if (currentResults.length === 0) {
-    noResult.classList.add('show');
-    return;
-  }
-
-  // Display all results
-  currentResults.forEach(biz => {
-    const hasPaid = localStorage.getItem(`paid_${biz.id}`) === 'true';
-    const card = document.createElement('div');
-    card.className = 'result-card show';
-    
-    // CHINEGBO FIX: Use correct field names + fallback for photo
-    //const photoUrl = biz.photoUrl || 'https://via.placeholder.com/80/0A3D62/FFFFFF?text=' + (biz.businessName?.charAt(0) || 'B');
-    
-    card.innerHTML = `
-    
-      <div class="biz-name">${biz.businessName || 'No Name'}</div>
-      <div class="biz-cat">${biz.skill || 'N/A'}</div>
-      <div class="biz-area">${biz.area || 'N/A'}</div>
-      <div class="biz-desc">${biz.bio || ''}</div>
-      <div class="phone">${hasPaid ? biz.phone : maskPhone(biz.phone)}</div>
-      ${hasPaid ? `
-        <div class="contact-btns show">
-          <a href="tel:${biz.phone}" class="call-btn">📞 Call Now</a>
-          <a href="https://wa.me/${biz.whatsapp}" class="wa-btn">💬 WhatsApp</a>
-        </div>
-      ` : `
-        <button class="unlock-btn" onclick="payToUnlock('${biz.id}', '${biz.businessName}')">
-          Pay ₦${UNLOCK_PRICE} to Unlock Contact
-        </button>
-      `}
-    `;
-    resultsContainer.appendChild(card);
-  });
-}
-
-function maskPhone(phone) {
-  if (!phone) return 'N/A';
-  return phone.substring(0, 4) + '***' + phone.substring(7);
-}
-
-// 3. PAYSTACK PAYWALL
-window.payToUnlock = (artisanId, name) => {
-  const handler = PaystackPop.setup({
-    key: PAYSTACK_PUBLIC_KEY,
-    email: 'customer@finditph.com',
-    amount: UNLOCK_PRICE * 100,
-    currency: 'NGN',
-    ref: 'FINDIT_' + Date.now(),
-    metadata: { artisanId, artisanName: name },
-    callback: function(response) {
-      localStorage.setItem(`paid_${artisanId}`, 'true');
-      alert('Payment successful! Contact unlocked.');
-      searchBusiness();
-    },
-    onClose: function() {
-      alert('Payment cancelled');
+        querySnapshot.forEach((doc) => {
+          const biz = doc.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="biz-name">${biz.businessName || 'No Name'}</div>
+            <div class="biz-skill">${biz.skill || 'No Skill'}</div>
+            <div class="biz-area">${biz.area || 'No Area'}</div>
+            <div>${biz.bio || ''}</div>
+            <div class="biz-phone">${biz.phone || 'No Phone'}</div>
+          `;
+          resultsDiv.appendChild(card);
+        });
+        
+      } catch (error) {
+        document.getElementById('loading').innerHTML = 'Error: ' + error.message;
+        console.error(error);
+      }
     }
-  });
-  handler.openIframe();
-}
 
-window.sendComplaint = () => {
-  const text = document.getElementById('complaintText').value.trim();
-  if (!text) {
-    alert('Please enter your complaint');
-    return;
-  }
-  const msg = encodeURIComponent('FindIt PH Complaint: ' + text);
-  window.open('https://wa.me/' + ADMIN_WHATSAPP + '?text=' + msg, '_blank');
-  document.getElementById('complaintText').value = '';
-  alert('Complaint sent to Admin');
-}
-
-// Enter key to search
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') searchBusiness();
-});
-</script>
+    loadArtisans();
+  </script>
 </body>
 </html>
