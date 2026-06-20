@@ -189,6 +189,7 @@
         
         querySnapshot.forEach((doc) => {
           const biz = doc.data();
+           if (biz.status !== "approved") return; 
           const artisanId = doc.id;
           const bizText = `${biz.businessName || ''} ${biz.skill || ''} ${biz.businessType || ''} ${biz.area || ''} ${biz.bio || ''}`.toLowerCase();
           
