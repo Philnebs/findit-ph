@@ -13,13 +13,4 @@ export const firebaseConfig = {
 export const PAYSTACK_PUBLIC_KEY = "pk_test_801bdf0827727162d12ad6750620ac3b318";
 export const ADMIN_WHATSAPP = "2348107474626";
 export const UNLOCK_PRICE = 100; // Change to 200, 300, 500 anytime you want
-//manual payment
-function logManualPayment(artisanId, artisanName, phoneNumber) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName('Manual_Payments');
-  if (!sheet) {
-    sheet = ss.insertSheet('Manual_Payments');
-    sheet.appendRow(['Timestamp', 'Artisan_ID', 'Artisan_Name', 'Phone_Unlocked', 'Amount_Expected', 'Status']);
-  }
-  sheet.appendRow([new Date(), artisanId, artisanName, phoneNumber, 100, 'VERIFY OPAY']);
-}
+
