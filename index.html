@@ -148,58 +148,45 @@
     // Track unlocked artisans in this session
     let unlockedArtisans = JSON.parse(sessionStorage.getItem('unlockedArtisans') || '[]');
 
-   function payToUnlock(artisanId, artisanName, artisanPhone) {
-  // Remove any existing modal first
-  const oldModal = document.getElementById('manualModal');
-  if (oldModal) oldModal.remove();
-
-  // Create payment modal with your Opay details
-  const modalHTML = `
-    <div id="manualModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center; font-family:Arial;">
-      <div style="background:white; padding:25px; border-radius:12px; max-width:340px; width:90%; text-align:center; box-shadow:0 5px 20px rgba(0,0,0,0.3);">
-        <h3 style="margin:0 0 15px 0; color:#333; font-size:18px;">🔓 Unlock Contact - ₦100</h3>
-        
-        <div style="background:#f0f8ff; padding:15px; border:2px dashed #0066cc; border-radius:8px; margin-bottom:15px;">
-          <p style="margin:0; font-size:12px; color:#666;">Transfer ₦100 to:</p>
-          <p style="margin:8px 0; font-size:24px; font-weight:800; color:#0066cc; letter-spacing:1px;">9130896727</p>
-          <p style="margin:0; font-size:14px; color:#333; font-weight:600;">Opay - Ikwuagwu Phillip Chinegbo</p>
-        </div>
-        
-        <p style="font-size:13px; color:#555; margin:0 0 20px 0;">Use "FindIt-PH" as transfer description</p>
-        
-        <button onclick="confirmManualUnlock('${artisanId}', '${artisanName}', '${artisanPhone}')" 
-                style="background:#28a745; color:white; border:none; padding:15px; border-radius:8px; font-weight:700; width:100%; font-size:16px; cursor:pointer; margin-bottom:10px;">
-          ✅ I Have Paid ₦100
-        </button>
-        
-        <button onclick="document.getElementById('manualModal').remove()" 
-                style="background:transparent; color:#666; border:1px solid #ddd; padding:12px; border-radius:8px; width:100%; cursor:pointer; font-weight:600;">
-          Cancel
-        </button>
-        
-        <p style="font-size:11px; color:#999; margin:15px 0 0 0; line-height:1.4;">Number shows immediately. Your honesty keeps FindIt-PH running for PH 🙏</p>
-      </div>
-    </div>
-  `;
-  
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-function confirmManualUnlock(artisanId, artisanName, artisanPhone) {
-  // 1. Close modal
-  document.getElementById('manualModal').remove();
-  
-  // 2. Unlock artisan - same as your old Paystack callback
-  unlockedArtisans.push(artisanId);
-  sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
-  
-  // 3. Refresh results to show unlocked contact
-  alert('Contact unlocked! Please complete your ₦100 transfer to 9130896727 if you have not yet.');
-  searchArtisans(); // This calls your existing function to refresh and show phone
-  
-  // 4. Log to Google Sheets for verification
-  google.script.run.logManualPayment(artisanId, artisanName, artisanPhone);
-}
+    function payToUnlock(artisanId, artisanName, artisanPhone) {
+      let handler = PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: 'customer@finditph.com',
+        amount: UNLOCK_PRICE * 100, // Paystack uses kobo
+        currency: 'NGN',
+        ref: 'FindIt_' + Date.now() + '_' + artisanId,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Artisan Name",
+              variable_name: "artisan_name", 
+              value: artisanName
+            },
+            {
+              display_name: "Artisan Phone",
+              variable_name: "artisan_phone",
+              value: artisanPhone
+            }
+          ]
+        },
+        callback: function(response) {
+          // Payment successful
+          unlockedArtisans.push(artisanId);
+          sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
+          
+          // Refresh results to show unlocked contact
+          searchArtisans();
+          
+          // Log to Google Sheets
+          google.script.run.logPayment(response.reference, artisanId, artisanName, artisanPhone);
+          
+          alert('Payment successful! Contact unlocked.');
+        },
+        onClose: function() {
+          alert('Payment cancelled. Contact remains locked.');
+        }
+      });
+      handler.openIframe();
     }
 
     async function searchArtisans() {
