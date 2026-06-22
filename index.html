@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FindIt-PH - Find Artisans in Port Harcourt</title>
-  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
@@ -132,7 +132,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { firebaseConfig, PAYSTACK_PUBLIC_KEY, ADMIN_WHATSAPP, UNLOCK_PRICE } from './config.js';
+    import { firebaseConfig, ADMIN_WHATSAPP, UNLOCK_PRICE, FLUTTERWAVE_PUBLIC_KEY } from './config.js';
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -149,44 +149,40 @@
     let unlockedArtisans = JSON.parse(sessionStorage.getItem('unlockedArtisans') || '[]');
 
     function payToUnlock(artisanId, artisanName, artisanPhone) {
-      let handler = PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: 'customer@finditph.com',
-        amount: UNLOCK_PRICE * 100, // Paystack uses kobo
+      FlutterwaveCheckout({
+        public_key: FLUTTERWAVE_PUBLIC_KEY, // Now coming from config.js
+        tx_ref: 'FindIt_' + Date.now() + '_' + artisanId,
+        amount: 100, // ₦100 for test. Change to UNLOCK_PRICE when ready
         currency: 'NGN',
-        ref: 'FindIt_' + Date.now() + '_' + artisanId,
-        metadata: {
-          custom_fields: [
-            {
-              display_name: "Artisan Name",
-              variable_name: "artisan_name", 
-              value: artisanName
-            },
-            {
-              display_name: "Artisan Phone",
-              variable_name: "artisan_phone",
-              value: artisanPhone
-            }
-          ]
+        payment_options: "card, banktransfer, ussd",
+        customer: {
+          email: 'customer@finditph.com',
+          phone_number: artisanPhone || '08012345678',
+          name: artisanName || 'FindIt PH Customer',
         },
-        callback: function(response) {
-          // Payment successful
-          unlockedArtisans.push(artisanId);
-          sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
-          
-          // Refresh results to show unlocked contact
-          searchArtisans();
-          
-          // Log to Google Sheets
-          google.script.run.logPayment(response.reference, artisanId, artisanName, artisanPhone);
-          
-          alert('Payment successful! Contact unlocked.');
+        customizations: {
+          title: "Unlock Artisan Contact",
+          description: "Payment to view " + artisanName + "'s contact",
+          logo: "https://findit-ph.netlify.app/logo.png",
         },
-        onClose: function() {
-          alert('Payment cancelled. Contact remains locked.');
+        callback: function (data) {
+          if (data.status == "successful") {
+            // Payment successful
+            unlockedArtisans.push(artisanId);
+            sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
+            
+            // Refresh results to show unlocked contact
+            searchArtisans();
+            
+            alert('Payment successful! Contact unlocked ✅');
+          } else {
+            alert('Payment not completed. Try again.');
+          }
+        },
+        onclose: function() {
+          console.log('Payment window closed');
         }
       });
-      handler.openIframe();
     }
 
     async function searchArtisans() {
@@ -236,9 +232,9 @@
                 ` : `
                   <div class="contact-locked">
                     <strong>Contact Hidden</strong><br>
-                    Pay ₦${UNLOCK_PRICE} to unlock phone & WhatsApp<br>
+                    Pay ₦100 to unlock phone & WhatsApp<br>
                     <button class="pay-btn" onclick="payToUnlock('${artisanId}', '${biz.businessName}', '${phone}')">
-                      🔓 Unlock Contact - ₦${UNLOCK_PRICE}
+                      🔓 Unlock Contact - ₦100
                     </button>
                   </div>
                 `}
