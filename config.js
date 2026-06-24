@@ -1,18 +1,14 @@
-// config.js
+// config.js - Connects to Netlify VITE_ variables
 export const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Your Paystack stuff can stay below if you want
-//export const PAYSTACK_PUBLIC_KEY = "";
 export const ADMIN_WHATSAPP = "2348107474626";
-export const UNLOCK_PRICE = 100; // Change to 200, 300, 500 anytime you want
-export const FLUTTERWAVE_PUBLIC_KEY = ""; // LEAVE EMPTY. Netlify go inject am.
-
-// Don't paste FLWSECK_xxxxx here o! Leave am empty ;
+export const UNLOCK_PRICE = 100;
+export const FLUTTERWAVE_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY;
