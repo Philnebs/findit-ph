@@ -150,11 +150,15 @@
 
     function payToUnlock(artisanId, artisanName, artisanPhone) {
       FlutterwaveCheckout({
-        public_key: FLUTTERWAVE_PUBLIC_KEY, // Now coming from config.js
+        public_key: FLUTTERWAVE_PUBLIC_KEY,
         tx_ref: 'FindIt_' + Date.now() + '_' + artisanId,
         amount: 100, // ₦100 for test. Change to UNLOCK_PRICE when ready
         currency: 'NGN',
         payment_options: "card, banktransfer, ussd",
+        
+        // 👇 ONLY CHANGE 1: ADD THIS LINE
+        redirect_url: "https://findit-ph.netlify.app/index.html",
+        
         customer: {
           email: 'customer@finditph.com',
           phone_number: artisanPhone || '08012345678',
@@ -165,16 +169,21 @@
           description: "Payment to view " + artisanName + "'s contact",
           logo: "https://findit-ph.netlify.app/logo.png",
         },
-        callback: function (data) {
-          if (data.status == "successful") {
+        
+        // 👇 ONLY CHANGE 2: UPDATED CALLBACK
+        callback: function (response) {
+          console.log(response);
+          if (response.status === "successful") {
             // Payment successful
             unlockedArtisans.push(artisanId);
             sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
             
+            // Show success message
+            alert('Payment successful! Contact unlocked ✅');
+            
             // Refresh results to show unlocked contact
             searchArtisans();
             
-            alert('Payment successful! Contact unlocked ✅');
           } else {
             alert('Payment not completed. Try again.');
           }
