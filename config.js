@@ -1,14 +1,16 @@
 // config.js - Connects to Netlify VITE_ variables
-export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+const firebaseConfig = {
+  apiKey: "AIzaSyB3Pf_jfnBDe6atBpDuqIQg7lISUKu2YuFw",
+  authDomain: "findit-ph-e1d0f.firebaseapp.com",
+  databaseURL: "https://findit-ph-e1d0f-default-rtdb.firebaseio.com",
+  projectId: "findit-ph-e1d0f",
+  storageBucket: "findit-ph-e1d0f.appspot.com",
+  messagingSenderId: "18398015033",
+  appId: "1:18398015033:web:53a46e7e32b7f6cdeb27e8"
 };
+
+export default firebaseConfig;
 
 export const ADMIN_WHATSAPP = "2348107474626";
 export const UNLOCK_PRICE = 100;
-export const FLUTTERWAVE_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY;
+export const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-8e1e872f6b9446778c604da939ff3942-X";
