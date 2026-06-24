@@ -142,22 +142,20 @@
     const resultsDiv = document.getElementById('results');
     const loadingDiv = document.getElementById('loading');
     
-    // Set complain link
     document.getElementById('complainLink').href = `https://wa.me/${ADMIN_WHATSAPP}?text=Hi%20FindIt-PH%20Admin%2C%20I%20have%20a%20complaint`;
 
-    // Track unlocked artisans in this session
-    let unlockedArtisans = JSON.parse(sessionStorage.getItem('unlockedArtisans') || '[]');
+    // FIX 1: Use localStorage instead of sessionStorage so it survives page refresh
+    let unlockedArtisans = JSON.parse(localStorage.getItem('unlockedArtisans') || '[]');
 
     function payToUnlock(artisanId, artisanName, artisanPhone) {
       FlutterwaveCheckout({
         public_key: FLUTTERWAVE_PUBLIC_KEY,
         tx_ref: 'FindIt_' + Date.now() + '_' + artisanId,
-        amount: 100, // ₦100 for test. Change to UNLOCK_PRICE when ready
+        amount: 100,
         currency: 'NGN',
         payment_options: "card, banktransfer, ussd",
         
-        // 👇 ONLY CHANGE 1: ADD THIS LINE
-        redirect_url: "https://findit-ph.netlify.app/index.html",
+        // 👇 REMOVED redirect_url - THIS WAS THE PROBLEM
         
         customer: {
           email: 'customer@finditph.com',
@@ -170,15 +168,16 @@
           logo: "https://findit-ph.netlify.app/logo.png",
         },
         
-        // 👇 ONLY CHANGE 2: UPDATED CALLBACK
+        // 👇 FIX 2: Callback now runs because no redirect_url
         callback: function (response) {
-          console.log(response);
+          console.log('Flutterwave response:', response);
           if (response.status === "successful") {
-            // Payment successful
-            unlockedArtisans.push(artisanId);
-            sessionStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
+            // Add to unlocked list
+            if (!unlockedArtisans.includes(artisanId)) {
+              unlockedArtisans.push(artisanId);
+              localStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
+            }
             
-            // Show success message
             alert('Payment successful! Contact unlocked ✅');
             
             // Refresh results to show unlocked contact
@@ -220,9 +219,10 @@
           
           if (bizText.includes(searchTerm)) {
             found++;
+            // FIX 3: Check localStorage for unlocked artisans
             const isUnlocked = unlockedArtisans.includes(artisanId);
             const phone = biz.phone || '';
-            const cleanPhone = phone.replace(/\D/g, ''); // Remove non-digits for links
+            const cleanPhone = phone.replace(/\D/g, '');
             const whatsappLink = `https://wa.me/234${cleanPhone.substring(cleanPhone.length - 10)}?text=Hi%20${biz.businessName}%2C%20I%20found%20you%20on%20FindIt-PH`;
             
             html += `
@@ -272,7 +272,6 @@
       }
     }
 
-    // Make payToUnlock available globally for onclick
     window.payToUnlock = payToUnlock;
 
     searchBtn.addEventListener('click', searchArtisans);
