@@ -7,107 +7,35 @@
   <script src="https://checkout.flutterwave.com/v3.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: 'Segoe UI', Arial, sans-serif; 
-      background: #f5f5f5; 
-      color: #333;
-    }
-    .header { 
-      background: #0A3D62; 
-      color: white; 
-      padding: 20px; 
-      text-align: center; 
-    }
-    .search-container {
-      background: white;
-      padding: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .search-box {
-      display: flex;
-      gap: 10px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    #searchInput {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
-      border: 2px solid #ddd;
-      border-radius: 6px;
-    }
-    #searchBtn {
-      padding: 12px 20px;
-      font-size: 16px;
-      background: #0A3D62;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #results {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 0 20px;
-    }
-    .card { 
-      background: white; 
-      padding: 20px; 
-      margin: 15px 0; 
-      border-radius: 10px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
-    }
-    .biz-name { font-size: 22px; font-weight: bold; color: #0A3D62; margin-bottom: 8px; }
-    .biz-skill { color: #E67E22; font-weight: 600; margin: 5px 0; }
-    .biz-area { color: #7f8c8d; margin: 5px 0; }
-    .contact-locked { 
-      background: #fff3cd; 
-      padding: 15px; 
-      border-radius: 8px; 
-      margin-top: 15px;
-      border: 1px solid #ffeaa7;
-    }
-    .contact-unlocked {
-      background: #d4edda;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 15px;
-      border: 1px solid #c3e6cb;
-    }
-    .pay-btn, .action-btn {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 5px 5px 5px 0;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .pay-btn { background: #00C851; color: white; }
-    .call-btn { background: #3498db; color: white; }
-    .wa-btn { background: #25D366; color: white; }
-    .report-btn { background: #e74c3c; color: white; font-size: 14px; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; color: #333; }
+   .header { background: #0A3D62; color: white; padding: 20px; text-align: center; }
+   .search-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 10; }
+   .search-box { display: flex; gap: 10px; max-width: 600px; margin: 0 auto; }
+    #searchInput { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 6px; }
+    #searchBtn { padding: 12px 20px; font-size: 16px; background: #0A3D62; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    #results { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+   .card { background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+   .biz-name { font-size: 22px; font-weight: bold; color: #0A3D62; margin-bottom: 8px; }
+   .biz-skill { color: #E67E22; font-weight: 600; margin: 5px 0; }
+   .biz-area { color: #7f8c8d; margin: 5px 0; }
+   .contact-locked { background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeaa7; }
+   .contact-unlocked { background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #c3e6cb; }
+   .contact-pending { background: #e1f5fe; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #b3e5fc; }
+   .pay-btn,.action-btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px 5px 5px 0; text-decoration: none; display: inline-block; }
+   .pay-btn { background: #00C851; color: white; }
+   .call-btn { background: #3498db; color: white; }
+   .wa-btn { background: #25D366; color: white; }
+   .report-btn { background: #e74c3c; color: white; font-size: 14px; }
+   .verify-btn { background: #9b59b6; color: white; }
     #loading, #message { text-align: center; padding: 40px; font-size: 18px; color: #888; }
-    .footer {
-      text-align: center;
-      padding: 30px 20px;
-      background: #0A3D62;
-      color: white;
-      margin-top: 40px;
-    }
+   .footer { text-align: center; padding: 30px 20px; background: #0A3D62; color: white; margin-top: 40px; }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>FindIt-PH</h1>
     <p>Find trusted artisans in Port Harcourt</p>
-    <a href="./register.html" style="background: #E67E22; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px;">
-    + Register Your Business Here
-</a>
+    <a href="./register.html" style="background: #E67E22; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px;">+ Register Your Business Here</a>
   </div>
 
   <div class="search-container">
@@ -118,15 +46,11 @@
   </div>
 
   <div id="loading" style="display: none;">Searching...</div>
-  <div id="results">
-    <div id="message">Search for artisans above to see results</div>
-  </div>
+  <div id="results"><div id="message">Search for artisans above to see results</div></div>
 
   <div class="footer">
     <p>FindIt-PH © 2026</p>
-    <a href="" id="complainLink" class="action-btn report-btn" style="margin-top:15px;">
-      📱 Complain to Admin
-    </a>
+    <a href="" id="complainLink" class="action-btn report-btn" style="margin-top:15px;">📱 Complain to Admin</a>
   </div>
 
   <script type="module">
@@ -141,22 +65,28 @@
     const searchBtn = document.getElementById('searchBtn');
     const resultsDiv = document.getElementById('results');
     const loadingDiv = document.getElementById('loading');
-    
+
     document.getElementById('complainLink').href = `https://wa.me/${ADMIN_WHATSAPP}?text=Hi%20FindIt-PH%20Admin%2C%20I%20have%20a%20complaint`;
 
-    // FIX 1: Use localStorage instead of sessionStorage so it survives page refresh
     let unlockedArtisans = JSON.parse(localStorage.getItem('unlockedArtisans') || '[]');
+    let pendingPayments = JSON.parse(localStorage.getItem('pendingPayments') || '{}');
 
     function payToUnlock(artisanId, artisanName, artisanPhone) {
+      const txRef = 'FindIt_' + Date.now() + '_' + artisanId.replace(/[^a-zA-Z0-9]/g, '');
+      
+      pendingPayments[txRef] = {
+        artisanId: artisanId,
+        artisanName: artisanName,
+        artisanPhone: artisanPhone
+      };
+      localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
+
       FlutterwaveCheckout({
         public_key: FLUTTERWAVE_PUBLIC_KEY,
-        tx_ref: 'FindIt_' + Date.now() + '_' + artisanId,
-        amount: 100,
+        tx_ref: txRef,
+        amount: 100, // CHANGE TO UNLOCK_PRICE TO MAKE MONEY
         currency: 'NGN',
-        payment_options: "card, banktransfer, ussd",
-        
-        // 👇 REMOVED redirect_url - THIS WAS THE PROBLEM
-        
+        payment_options: "card, banktransfer, ussd, account, opay",
         customer: {
           email: 'customer@finditph.com',
           phone_number: artisanPhone || '08012345678',
@@ -167,35 +97,62 @@
           description: "Payment to view " + artisanName + "'s contact",
           logo: "https://findit-ph.netlify.app/logo.png",
         },
-        
-        // 👇 FIX 2: Callback now runs because no redirect_url
         callback: function (response) {
-          console.log('Flutterwave response:', response);
-          if (response.status === "successful") {
-            // Add to unlocked list
-            if (!unlockedArtisans.includes(artisanId)) {
-              unlockedArtisans.push(artisanId);
-              localStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
-            }
-            
-            alert('Payment successful! Contact unlocked ✅');
-            
-            // Refresh results to show unlocked contact
+          if (response.status === "successful" || response.status === "completed") {
+            unlockContact(artisanId, response.tx_ref);
+          } else if (response.status === "pending") {
+            alert('Bank transfer started! ✅\n\n1. Complete payment in your OPay/Bank app\n2. Come back and click "I Have Paid"\n3. Contact details will show');
             searchArtisans();
-            
           } else {
             alert('Payment not completed. Try again.');
           }
         },
         onclose: function() {
-          console.log('Payment window closed');
+          searchArtisans();
         }
       });
     }
 
+    // ONLY UNLOCK + SHOW NUMBERS - NO AUTO WHATSAPP
+    function unlockContact(artisanId, txRef) {
+      if (!unlockedArtisans.includes(artisanId)) {
+        unlockedArtisans.push(artisanId);
+        localStorage.setItem('unlockedArtisans', JSON.stringify(unlockedArtisans));
+      }
+      if (txRef && pendingPayments[txRef]) {
+        delete pendingPayments[txRef];
+        localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
+      }
+      
+      alert('Payment successful! ✅ Contact details unlocked below');
+      searchArtisans(); // Just refresh to show the numbers
+    }
+
+    window.verifyPayment = function(artisanId) {
+      let foundTxRef = null;
+      let artisanData = null;
+      
+      for (const [txRef, data] of Object.entries(pendingPayments)) {
+        if (data.artisanId === artisanId) {
+          foundTxRef = txRef;
+          artisanData = data;
+          break;
+        }
+      }
+
+      if (foundTxRef && artisanData) {
+        const confirmPay = confirm('Have you completed the ₦100 transfer?\n\nClick OK to unlock contact details.\n\nRef: ' + foundTxRef);
+        
+        if (confirmPay) {
+          unlockContact(artisanId, foundTxRef);
+        }
+      } else {
+        alert('No pending payment found. Please start payment again.');
+      }
+    }
+
     async function searchArtisans() {
       const searchTerm = searchInput.value.toLowerCase().trim();
-      
       if (!searchTerm) {
         resultsDiv.innerHTML = '<div id="message">Please enter a skill or area to search</div>';
         return;
@@ -207,52 +164,58 @@
       try {
         const querySnapshot = await getDocs(collection(db, "artisans"));
         loadingDiv.style.display = 'none';
-        
         let found = 0;
         let html = '';
-        
+
         querySnapshot.forEach((doc) => {
           const biz = doc.data();
-           if (biz.status !== "approved") return; 
+          if (biz.status !== "approved") return;
           const artisanId = doc.id;
           const bizText = `${biz.businessName || ''} ${biz.skill || ''} ${biz.businessType || ''} ${biz.area || ''} ${biz.bio || ''}`.toLowerCase();
-          
+
           if (bizText.includes(searchTerm)) {
             found++;
-            // FIX 3: Check localStorage for unlocked artisans
             const isUnlocked = unlockedArtisans.includes(artisanId);
+            const isPending = Object.values(pendingPayments).some(data => data.artisanId === artisanId);
             const phone = biz.phone || '';
             const cleanPhone = phone.replace(/\D/g, '');
             const whatsappLink = `https://wa.me/234${cleanPhone.substring(cleanPhone.length - 10)}?text=Hi%20${biz.businessName}%2C%20I%20found%20you%20on%20FindIt-PH`;
-            
+
             html += `
               <div class="card">
                 <div class="biz-name">${biz.businessName || 'No Name'}</div>
                 <div class="biz-skill">${biz.skill || biz.businessType || 'No Skill Listed'}</div>
                 <div class="biz-area">📍 ${biz.area || 'No Area Listed'}</div>
                 <div style="margin: 10px 0;">${biz.bio || ''}</div>
-                
+
                 ${isUnlocked ? `
                   <div class="contact-unlocked">
                     <strong>Contact Unlocked:</strong><br>
-                    <a href="tel:${phone}" class="action-btn call-btn">📞 Call ${phone}</a>
+                    <div style="margin: 10px 0; font-size: 18px;">📞 ${phone}</div>
+                    <a href="tel:${phone}" class="action-btn call-btn">📞 Call Now</a>
                     <a href="${whatsappLink}" target="_blank" class="action-btn wa-btn">💬 WhatsApp</a>
+                  </div>
+                ` : isPending ? `
+                  <div class="contact-pending">
+                    <strong>Payment Pending</strong><br>
+                    Complete ₦100 transfer, then click:<br>
+                    <button class="pay-btn verify-btn" onclick="verifyPayment('${artisanId}')">
+                      ✅ I Have Paid - Show Contact
+                    </button>
                   </div>
                 ` : `
                   <div class="contact-locked">
                     <strong>Contact Hidden</strong><br>
-                    Pay ₦100 to unlock phone & WhatsApp<br>
+                    Pay ₦100 to view phone & WhatsApp<br>
                     <button class="pay-btn" onclick="payToUnlock('${artisanId}', '${biz.businessName}', '${phone}')">
                       🔓 Unlock Contact - ₦100
                     </button>
                   </div>
                 `}
-                
+
                 <div style="margin-top:15px;">
-                  <a href="https://wa.me/${ADMIN_WHATSAPP}?text=Hi%20FindIt-PH%20Admin%2C%20I%20want%20to%20report%20${biz.businessName}" 
-                     target="_blank" class="action-btn report-btn">
-                     ⚠️ Report This Artisan
-                  </a>
+                  <a href="https://wa.me/${ADMIN_WHATSAPP}?text=Hi%20FindIt-PH%20Admin%2C%20I%20want%20to%20report%20${biz.businessName}"
+                     target="_blank" class="action-btn report-btn">⚠️ Report This Artisan</a>
                 </div>
               </div>
             `;
@@ -264,7 +227,7 @@
         } else {
           resultsDiv.innerHTML = html;
         }
-        
+
       } catch (error) {
         loadingDiv.style.display = 'none';
         resultsDiv.innerHTML = `<div id="message">Error: ${error.message}</div>`;
@@ -273,7 +236,6 @@
     }
 
     window.payToUnlock = payToUnlock;
-
     searchBtn.addEventListener('click', searchArtisans);
     searchInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') searchArtisans();
